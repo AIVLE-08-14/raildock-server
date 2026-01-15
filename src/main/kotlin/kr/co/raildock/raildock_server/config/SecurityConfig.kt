@@ -21,8 +21,6 @@ class SecurityConfig {
             .authorizeHttpRequests {auth ->
                 auth.requestMatchers(
                     "/auth/**",
-                    "/login",
-                    "/logout",
                     "/swagger-ui/**",
                     "/docs",
                     "/v3/api-docs/**",
@@ -30,12 +28,12 @@ class SecurityConfig {
                     auth.anyRequest().authenticated()
             }
             .formLogin { form ->
-                form.loginProcessingUrl("/login")
+                form.loginProcessingUrl("/auth/login")
                     .usernameParameter("email")
                     .permitAll()
             }
             .logout { logout ->
-                logout.logoutUrl("/logout")
+                logout.logoutUrl("/auth/logout")
                     .invalidateHttpSession(true)
                     .deleteCookies("JSESSIONID")
                     .permitAll()
