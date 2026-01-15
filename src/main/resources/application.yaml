@@ -5,13 +5,22 @@ spring:
     password: secret
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     properties:
       hibernate:
         format_sql: true
     open-in-view: false
   application:
     name: raildock-server
+  session:
+    timeout: 30m
+    jdbc:
+        initialize-schema: always
 springdoc:
   swagger-ui:
     path: /docs
+server:
+  servlet:
+    session:
+      cookie:
+        max-age: 3600

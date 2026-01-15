@@ -25,18 +25,20 @@ class SecurityConfig {
                     "/logout",
                     "/swagger-ui/**",
                     "/docs",
-                    "v3/api-docs/**",
+                    "/v3/api-docs/**",
                     "/public/**").permitAll()
                     auth.anyRequest().authenticated()
             }
             .formLogin { form ->
                 form.loginProcessingUrl("/login")
-                form.usernameParameter("email")
+                    .usernameParameter("email")
+                    .permitAll()
             }
             .logout { logout ->
                 logout.logoutUrl("/logout")
-                logout.invalidateHttpSession(true)
-                logout.deleteCookies("JSESSIONID")
+                    .invalidateHttpSession(true)
+                    .deleteCookies("JSESSIONID")
+                    .permitAll()
             }
         return http.build()
     }
