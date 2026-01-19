@@ -3,7 +3,7 @@ version: 0.2
 env:
   variables:
     AWS_RESION: ap-northeast-2
-    ECR_REPO: raildock-server
+    ECR_REPO: raildock/server
     IMAGE_TAG: latest
 
 phases:
