@@ -19,6 +19,8 @@ spring:
 springdoc:
   swagger-ui:
     path: /docs
+    with-credentials: true
+  show-login-endpoint: true
 server:
   servlet:
     session:

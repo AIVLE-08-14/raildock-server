@@ -12,8 +12,14 @@ class User(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true, nullable = false)
+    val employeeId: String,
+
+    @Column(unique = true)
     val email: String,
+
+    @Column(unique = true)
+    val phoneNumber: String,
 
     @Column(nullable = false)
     @JsonProperty(access = Access.WRITE_ONLY)

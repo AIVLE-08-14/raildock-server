@@ -18,8 +18,10 @@ class UserService (
 
         val user = userRepository.save(
             User(
-                email = req.email,
+                employeeId = req.employeeId,
                 passwordHash = passwordEncoder.encode(req.password),
+                email = req.email,
+                phoneNumber = req.phoneNumber,
                 name = req.name,
             )
         )

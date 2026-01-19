@@ -1,7 +1,9 @@
 package kr.co.raildock.raildock_server.config
 
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.MediaType
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -22,20 +24,28 @@ class SecurityConfig {
                 auth.requestMatchers(
                     "/auth/**",
                     "/swagger-ui/**",
-                    "/docs",
+                    "/health",
+                    "/docs/**",
                     "/v3/api-docs/**",
                     "/public/**").permitAll()
                     auth.anyRequest().authenticated()
             }
+            .exceptionHandling { e ->
+                e.authenticationEntryPoint { _, res, _ ->
+                    res.status = HttpServletResponse.SC_UNAUTHORIZED
+                    res.contentType = MediaType.APPLICATION_JSON_VALUE
+                    res.writer.write("""{"message":"unauthorized"}""")
+                }
+            }
             .formLogin { form ->
                 form.loginProcessingUrl("/auth/login")
-                    .usernameParameter("email")
+                    .usernameParameter("employeeId")
                     .permitAll()
             }
             .logout { logout ->
-                logout.logoutUrl("/auth/logout")
+                logout.logoutUrl("/logout")
                     .invalidateHttpSession(true)
-                    .deleteCookies("JSESSIONID")
+                    .deleteCookies("SESSION")
                     .permitAll()
             }
         return http.build()
