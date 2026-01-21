@@ -21,6 +21,16 @@ rm -f .env.tmp
 echo "==== merged .env ===="
 cat .env
 
+# ---- ECR login (root) ----
+AWS_REGION=ap-northeast-2
+if ! command -v aws >/dev/null 2>&1; then
+  echo "aws cli not found" >&2
+  exit 1
+fi
+
+ECR_REGISTRY="$(grep '^ECR_URI=' .env | cut -d= -f2 | cut -d/ -f1)"
+aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$ECR_REGISTRY"
+
 docker compose -f docker-compose.prod.yml pull
 docker compose -f docker-compose.prod.yml up -d
 docker image prune -f || true
