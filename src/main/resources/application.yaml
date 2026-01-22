@@ -5,7 +5,7 @@ spring:
     password: secret
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
@@ -16,6 +16,10 @@ spring:
     timeout: 30m
     jdbc:
         initialize-schema: always
+  servlet:
+    multipart:
+      max-file-size: 2GB
+      max-request-size: 2GB
 springdoc:
   swagger-ui:
     path: /docs

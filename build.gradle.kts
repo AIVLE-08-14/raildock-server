@@ -1,9 +1,8 @@
 plugins {
 	kotlin("jvm") version "1.9.25"
 	kotlin("plugin.spring") version "1.9.25"
-	id("org.springframework.boot") version "3.5.9"
-	id("io.spring.dependency-management") version "1.1.7"
 	kotlin("plugin.jpa") version "1.9.25"
+	id("org.springframework.boot") version "3.5.9"
 }
 
 group = "kr.co.raildock"
@@ -27,24 +26,21 @@ repositories {
 }
 
 dependencies {
-	implementation(platform("software.amazon.awssdk:bom:2.25.34"))
+	// Springboot 종속성
+	implementation(platform("org.springframework.boot:spring-boot-dependencies:3.5.9"))
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-web")
+
+	// AWS 종속성
+	implementation(platform("software.amazon.awssdk:bom:2.41.5"))
 	implementation("software.amazon.awssdk:s3")
-	implementation("software.amazon.awssdk:auth")
-	implementation("software.amazon.awssdk:apache-client")
-	implementation("org.apache.httpcomponents:httpclient:4.5.14")
-	implementation("org.apache.httpcomponents:httpcore:4.4.16")
+
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.15")
-	implementation("org.springframework.session:spring-session-jdbc")
-	implementation("org.springframework.boot:spring-boot-starter-jdbc")
-	compileOnly("org.projectlombok:lombok")
-	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
+
 	runtimeOnly("com.mysql:mysql-connector-j")
-	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 	testImplementation("org.springframework.security:spring-security-test")
@@ -55,12 +51,6 @@ kotlin {
 	compilerOptions {
 		freeCompilerArgs.addAll("-Xjsr305=strict")
 	}
-}
-
-allOpen {
-	annotation("jakarta.persistence.Entity")
-	annotation("jakarta.persistence.MappedSuperclass")
-	annotation("jakarta.persistence.Embeddable")
 }
 
 tasks.withType<Test> {
