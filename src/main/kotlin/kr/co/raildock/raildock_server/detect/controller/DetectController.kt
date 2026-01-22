@@ -25,38 +25,38 @@ class DetectController(
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun create(
         @Parameter(description = "파일이름/요청명", required = true)
-        @RequestPart("name") name: String,
+        @RequestParam("name") name: String,
 
         @Parameter(description = "촬영 위치 및 구간", required = true)
-        @RequestPart("section") section: String,
+        @RequestParam("section") section: String,
 
         @Parameter(description = "촬영 시각", required = true)
-        @RequestPart("datetime") datetime: String,
+        @RequestParam("datetime") datetime: String,
 
         @Parameter(description = "방향", required = true)
-        @RequestPart("direction") direction: String,
+        @RequestParam("direction") direction: String,
 
         @Parameter(description = "습도", required = false)
-        @RequestPart("humidity", required = false) humidity: Int?,
+        @RequestParam("humidity", required = false) humidity: Int?,
 
         @Parameter(description = "온도", required = false)
-        @RequestPart("temperature", required = false) temperature: Int?,
+        @RequestParam("temperature", required = false) temperature: Int?,
 
         @Parameter(description = "날씨", required = false)
-        @RequestPart("weather", required = false) weather: String?,
+        @RequestParam("weather", required = false) weather: String?,
 
         @Parameter(description = "메타데이터(임시저장용)", required = false)
-        @RequestPart("metadata", required = false) metadata: MultipartFile?,
+        @RequestParam("metadata", required = false) metadata: MultipartFile?,
 
         // ---Video Files ---
         @Parameter(description = "애자 영상 파일", required = false)
-        @RequestPart("insulatorVideo", required = false) insulatorVideo: MultipartFile?,
+        @RequestParam("insulatorVideo", required = false) insulatorVideo: MultipartFile?,
 
         @Parameter(description = "철도 영상 파일", required = false)
-        @RequestPart("railVideo", required = false) railVideo: MultipartFile?,
+        @RequestParam("railVideo", required = false) railVideo: MultipartFile?,
 
         @Parameter(description = "둥지 영상 파일", required = false)
-        @RequestPart("nestVideo", required = false) nestVideo: MultipartFile?,
+        @RequestParam("nestVideo", required = false) nestVideo: MultipartFile?,
     ): ResponseEntity<DetectCreateResponse> {
         val res = service.create(
             name = name,

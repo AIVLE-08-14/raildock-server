@@ -101,7 +101,6 @@ class DetectService(
         if (railVideo != null && !railVideo.isEmpty) saveOne(VideoType.RAIL, railVideo)
         if (nestVideo != null && !nestVideo.isEmpty) saveOne(VideoType.NEST, nestVideo)
 
-        // 5) 응답
         return DetectCreateResponse(
             detectionId = pd.id!!,
             videos = createdVideos.map {
