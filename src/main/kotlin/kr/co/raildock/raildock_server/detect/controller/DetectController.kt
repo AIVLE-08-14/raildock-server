@@ -3,7 +3,10 @@ package kr.co.raildock.raildock_server.detect.controller
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import kr.co.raildock.raildock_server.detect.dto.DetectCreateResponse
-import kr.co.raildock.raildock_server.detect.dto.DetectJobGetResponse
+import kr.co.raildock.raildock_server.detect.dto.DetectVideoGetResponse
+import kr.co.raildock.raildock_server.detect.dto.ProblemDetectionGetResponse
+import kr.co.raildock.raildock_server.detect.dto.ProblemDetectionListResponse
+import kr.co.raildock.raildock_server.detect.repository.ProblemDetectionRepository
 import kr.co.raildock.raildock_server.detect.service.DetectService
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -13,7 +16,8 @@ import org.springframework.web.multipart.MultipartFile
 @RestController
 @RequestMapping("/detect")
 class DetectController(
-    private val service: DetectService
+    private val service: DetectService,
+    private val problemDetectionRepository: ProblemDetectionRepository
 ) {
     /*
     최소 검증?
@@ -72,5 +76,31 @@ class DetectController(
             nestVideo = nestVideo,
         )
         return ResponseEntity.accepted().body(res)
+    }
+
+    @Operation(summary = "Problem Detection 목록 조회")
+    @GetMapping
+    fun list(
+        @RequestParam("page", defaultValue = "0") page: Int,
+        @RequestParam("size", defaultValue = "20") size: Int
+    ): ResponseEntity<ProblemDetectionListResponse>{
+        return ResponseEntity.ok(service.listProblemDetections(page, size))
+    }
+
+    @Operation(summary = "Problem Detection 작업 상태 및 결과 조회")
+    @GetMapping("/{problemDetectionId}")
+    fun getProblemDetection(
+        @PathVariable("problemDetectionId") id: Long
+    ): ResponseEntity<ProblemDetectionGetResponse>{
+        return ResponseEntity.ok(service.getProblemDetection(id))
+    }
+
+
+    @Operation(summary = "단일 Detection Video 작업 상태 및 결과 조회")
+    @GetMapping("/video/{detectionVideoId}")
+    fun getDetectionVideo(
+        @PathVariable("detectionVideoId") videoId: Long
+    ): ResponseEntity<DetectVideoGetResponse>{
+        return ResponseEntity.ok(service.getDetectionVideo(videoId))
     }
 }

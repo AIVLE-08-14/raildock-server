@@ -22,7 +22,7 @@ class DetectionVideoEntity (
     var videoType: VideoType,
 
     @Column(nullable = false, length = 1024)
-            var videoURL: String,
+    var videoURL: String,
 
     @Column(nullable = false)
     var originalFilename: String,

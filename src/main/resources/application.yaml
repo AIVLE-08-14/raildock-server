@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    active: mock
   servlet:
     multipart:
       max-file-size: 500MB
@@ -33,3 +35,6 @@ server:
 logging:
   level:
     org.springframework.security: DEBUG
+
+fastapi:
+  base-url: http://fastapi:8000
