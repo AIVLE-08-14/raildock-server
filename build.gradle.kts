@@ -27,9 +27,15 @@ repositories {
 }
 
 dependencies {
+	implementation(platform("software.amazon.awssdk:bom:2.25.34"))
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-web")
+	implementation("software.amazon.awssdk:s3")
+	implementation("software.amazon.awssdk:auth")
+	implementation("software.amazon.awssdk:apache-client")
+	implementation("org.apache.httpcomponents:httpclient:4.5.14")
+	implementation("org.apache.httpcomponents:httpcore:4.4.16")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.15")

@@ -29,3 +29,7 @@ server:
 logging:
   level:
     org.springframework.security: DEBUG
+aws:
+  region: ap-northeast-2
+  s3:
+    bucket: raildock-filestorage
