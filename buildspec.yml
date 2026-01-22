@@ -20,9 +20,10 @@ phases:
       - docker tag $ECR_URI:latest $ECR_URI:$SHORT_SHA
   post_build:
     commands:
+      - mkdir -p deploy
       - docker push $ECR_URI:latest
       - docker push $ECR_URI:$SHORT_SHA
-      - printf "ECR_URI=%s\nIMAGE_TAG=%s\n" "$ECR_URI" "$SHORT_SHA" > deploy/.env
+      - printf "ECR_URI=%s\nIMAGE_TAG=%s\n" "$ECR_URI" "$SHORT_SHA" > deploy/image.env
 artifacts:
   files:
     - appspec.yml

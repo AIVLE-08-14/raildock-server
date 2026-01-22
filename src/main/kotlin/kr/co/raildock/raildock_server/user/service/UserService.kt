@@ -27,4 +27,9 @@ class UserService (
         )
     }
 
+    @Transactional(readOnly = true)
+    fun getUser(userId: Long): User {
+        return userRepository.findById(userId)
+            .orElseThrow { RuntimeException("존재하지 않는 사용자") }
+    }
 }
