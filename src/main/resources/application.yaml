@@ -1,10 +1,6 @@
 spring:
   profiles:
     active: mock
-  servlet:
-    multipart:
-      max-file-size: 500MB
-      max-request-size: 500MB
   datasource:
     url: jdbc:mysql://localhost:3306/mydatabase?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: myuser
@@ -22,6 +18,10 @@ spring:
     timeout: 30m
     jdbc:
         initialize-schema: always
+  servlet:
+    multipart:
+      max-file-size: 2GB
+      max-request-size: 2GB
 springdoc:
   swagger-ui:
     path: /docs
@@ -38,3 +38,7 @@ logging:
 
 fastapi:
   base-url: http://fastapi:8000
+aws:
+  region: ap-northeast-2
+  s3:
+    bucket: raildock-filestorage
