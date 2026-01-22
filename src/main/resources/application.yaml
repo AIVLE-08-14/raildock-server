@@ -1,11 +1,13 @@
 spring:
+  profiles:
+    active: mock
   datasource:
     url: jdbc:mysql://localhost:3306/mydatabase?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: myuser
     password: secret
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
@@ -16,6 +18,10 @@ spring:
     timeout: 30m
     jdbc:
         initialize-schema: always
+  servlet:
+    multipart:
+      max-file-size: 2GB
+      max-request-size: 2GB
 springdoc:
   swagger-ui:
     path: /docs
@@ -29,3 +35,10 @@ server:
 logging:
   level:
     org.springframework.security: DEBUG
+
+fastapi:
+  base-url: http://fastapi:8000
+aws:
+  region: ap-northeast-2
+  s3:
+    bucket: raildock-filestorage
