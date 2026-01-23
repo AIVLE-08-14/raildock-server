@@ -42,3 +42,6 @@ aws:
   region: ap-northeast-2
   s3:
     bucket: raildock-filestorage
+  cloudfront:
+    domain: https://d6enbbgppxz0x.cloudfront.net
+
