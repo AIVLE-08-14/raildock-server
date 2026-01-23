@@ -3,6 +3,7 @@ package kr.co.raildock.raildock_server.user.service
 import jakarta.servlet.http.HttpServletRequest
 import kr.co.raildock.raildock_server.common.exception.BusinessException
 import kr.co.raildock.raildock_server.user.dto.LoginRequestDTO
+import kr.co.raildock.raildock_server.user.dto.PasswordChangeRequestDTO
 import kr.co.raildock.raildock_server.user.dto.SignUpRequestDTO
 import kr.co.raildock.raildock_server.user.dto.UserUpdateRequestDTO
 import kr.co.raildock.raildock_server.user.entity.User
@@ -108,5 +109,29 @@ class UserService (
             }
 
         userRepository.delete(user)
+    }
+
+    @Transactional
+    fun changePassword(
+        userId: Long,
+        req: PasswordChangeRequestDTO
+    ) {
+        val user = userRepository.findById(userId)
+            .orElseThrow {
+                BusinessException(UserErrorCode.USER_NOT_FOUND)
+            }
+
+        // 1️⃣ 현재 비밀번호 검증
+        if (!passwordEncoder.matches(req.currentPassword, user.passwordHash)) {
+            throw BusinessException(UserErrorCode.INVALID_PASSWORD)
+        }
+
+        // 2️⃣ 기존 비밀번호와 동일한지 체크
+        if (passwordEncoder.matches(req.newPassword, user.passwordHash)) {
+            throw BusinessException(UserErrorCode.SAME_AS_OLD_PASSWORD)
+        }
+
+        // 3️⃣ 새 비밀번호 암호화 후 저장
+        user.passwordHash = passwordEncoder.encode(req.newPassword)
     }
 }

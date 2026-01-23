@@ -7,6 +7,7 @@ import jakarta.validation.Valid
 import kr.co.raildock.raildock_server.common.ApiResponse
 import kr.co.raildock.raildock_server.user.dto.LoginRequestDTO
 import kr.co.raildock.raildock_server.user.dto.MeResponseDTO
+import kr.co.raildock.raildock_server.user.dto.PasswordChangeRequestDTO
 import kr.co.raildock.raildock_server.user.dto.SignUpRequestDTO
 import kr.co.raildock.raildock_server.user.dto.UserUpdateRequestDTO
 import kr.co.raildock.raildock_server.user.service.UserPrincipal
@@ -94,4 +95,16 @@ class AuthController(
 
         return ResponseEntity.ok(ApiResponse.success("회원 탈퇴 완료"))
     }
+
+    @PatchMapping("/me/password")
+    @Operation(summary = "비밀번호 변경")
+    fun changePassword(
+        @AuthenticationPrincipal principal: UserPrincipal,
+        @Valid @RequestBody req: PasswordChangeRequestDTO
+    ): ResponseEntity<ApiResponse<Unit>> {
+
+        userService.changePassword(principal.userId, req)
+        return ResponseEntity.ok(ApiResponse.success("비밀번호 변경 완료"))
+    }
+
 }
