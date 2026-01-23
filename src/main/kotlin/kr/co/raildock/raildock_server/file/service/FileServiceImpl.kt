@@ -3,17 +3,26 @@ package kr.co.raildock.raildock_server.file.service
 import kr.co.raildock.raildock_server.config.S3Properties
 import kr.co.raildock.raildock_server.file.dto.UploadFileResponse
 import kr.co.raildock.raildock_server.file.entity.FileEntity
-import kr.co.raildock.raildock_server.file.entity.FileType
+import kr.co.raildock.raildock_server.file.enum.FileType
 import kr.co.raildock.raildock_server.file.repository.FileRepository
+import org.springframework.core.io.InputStreamResource
 import org.springframework.core.io.Resource
+import org.springframework.http.HttpHeaders.CONTENT_DISPOSITION
+import org.springframework.http.MediaType.parseMediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
+import software.amazon.awssdk.core.sync.RequestBody
+import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model.GetObjectRequest
+import software.amazon.awssdk.services.s3.model.PutObjectRequest
+import java.time.LocalDate
+import java.util.UUID.randomUUID
 
 @Service
 class FileServiceImpl(
     private val fileRepository: FileRepository,
-    private val s3Client: software.amazon.awssdk.services.s3.S3Client,
+    private val s3Client: S3Client,
     private val s3Properties: S3Properties
 ) : FileService {
 
@@ -24,7 +33,7 @@ class FileServiceImpl(
 
         val s3Key = generateS3Key(fileType, originalFilename)
 
-        val putReq = software.amazon.awssdk.services.s3.model.PutObjectRequest.builder()
+        val putReq = PutObjectRequest.builder()
             .bucket(s3Properties.bucket)
             .key(s3Key)
             .contentType(contentType)
@@ -34,7 +43,7 @@ class FileServiceImpl(
         file.inputStream.use { input ->
             s3Client.putObject(
                 putReq,
-                software.amazon.awssdk.core.sync.RequestBody.fromInputStream(input, size)
+                RequestBody.fromInputStream(input, size)
             )
         }
 
@@ -62,18 +71,18 @@ class FileServiceImpl(
     override fun download(fileId: Long): ResponseEntity<Resource> {
         val file = fileRepository.findByIdAndStatus(fileId) ?: throw IllegalArgumentException("파일이 존재하지 않습니다.")
 
-        val getReq = software.amazon.awssdk.services.s3.model.GetObjectRequest.builder()
+        val getReq = GetObjectRequest.builder()
             .bucket(file.bucket)
             .key(file.s3Key)
             .build()
 
         val s3Object = s3Client.getObject(getReq) // ResponseInputStream<GetObjectResponse>
 
-        val resource = org.springframework.core.io.InputStreamResource(s3Object)
+        val resource = InputStreamResource(s3Object)
 
         return ResponseEntity.ok()
-            .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"${file.originalFilename}\"")
-            .contentType(org.springframework.http.MediaType.parseMediaType(file.contentType))
+            .header(CONTENT_DISPOSITION, "attachment; filename=\"${file.originalFilename}\"")
+            .contentType(parseMediaType(file.contentType))
             .contentLength(file.size)
             .body(resource)
     }
@@ -86,8 +95,8 @@ class FileServiceImpl(
 
     private fun generateS3Key(fileType: FileType, originalFilename: String): String {
         val ext = originalFilename.substringAfterLast('.', "")
-        val date = java.time.LocalDate.now()
-        val uuid = java.util.UUID.randomUUID()
+        val date = LocalDate.now()
+        val uuid = randomUUID()
         return "${fileType.name.lowercase()}/$date/$uuid.${ext}"
     }
 }

@@ -46,13 +46,6 @@ class SecurityConfig {
                 ).permitAll()
                 auth.anyRequest().authenticated()
             }
-            .logout { logout ->
-                logout.logoutUrl("/logout")
-                    .invalidateHttpSession(true)
-                    .deleteCookies("SESSION")
-                    .permitAll()
-            }
-
         return http.build()
     }
 

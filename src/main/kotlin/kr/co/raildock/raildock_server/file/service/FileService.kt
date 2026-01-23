@@ -1,15 +1,18 @@
 package kr.co.raildock.raildock_server.file.service
 
-import kr.co.raildock.raildock_server.file.dto.GenerateUploadUrlRequest
-import kr.co.raildock.raildock_server.file.dto.GenerateUploadUrlResponse
+import kr.co.raildock.raildock_server.file.dto.UploadFileResponse
+import kr.co.raildock.raildock_server.file.enum.FileType
+import org.springframework.core.io.Resource
+import org.springframework.http.ResponseEntity
+import org.springframework.web.multipart.MultipartFile
 
 interface FileService {
     fun upload(
-        file: org.springframework.web.multipart.MultipartFile,
-        fileType: kr.co.raildock.raildock_server.file.entity.FileType
-    ): kr.co.raildock.raildock_server.file.dto.UploadFileResponse
+        file: MultipartFile,
+        fileType: FileType
+    ): UploadFileResponse
 
-    fun download(fileId: Long): org.springframework.http.ResponseEntity<org.springframework.core.io.Resource>
+    fun download(fileId: Long): ResponseEntity<Resource>
 
     fun deleteFile(fileId: Long)
 }

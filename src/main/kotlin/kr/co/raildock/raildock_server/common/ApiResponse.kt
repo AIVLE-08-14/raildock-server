@@ -1,18 +1,52 @@
 package kr.co.raildock.raildock_server.common
 
 data class ApiResponse<T>(
-    val success: Boolean = true,
-    val message: String = "OK",
+    val success: Boolean,
+    val code: String? = null,
+    val message: String,
     val data: T? = null
 ) {
     companion object {
-        fun ok(): ApiResponse<Unit> = ApiResponse()
-        fun ok(message: String): ApiResponse<Unit> = ApiResponse(message = message)
-        fun <T> ok(data: T): ApiResponse<T> = ApiResponse(data = data)
 
-        fun <T> fail(message: String, data: T? = null): ApiResponse<T> =
-            ApiResponse(success = false, message = message, data = data)
+        // ===== 성공 =====
+        fun success(): ApiResponse<Unit> =
+            ApiResponse(
+                success = true,
+                message = "OK"
+            )
 
+        fun success(message: String): ApiResponse<Unit> =
+            ApiResponse(
+                success = true,
+                message = message
+            )
+
+        fun <T> success(data: T): ApiResponse<T> =
+            ApiResponse(
+                success = true,
+                message = "OK",
+                data = data
+            )
+
+        fun <T> success(
+            data: T,
+            message: String
+        ): ApiResponse<T> =
+            ApiResponse(
+                success = true,
+                message = message,
+                data = data
+            )
+
+        // ===== 실패 =====
+        fun error(
+            code: String,
+            message: String
+        ): ApiResponse<Unit> =
+            ApiResponse(
+                success = false,
+                code = code,
+                message = message
+            )
     }
-
 }

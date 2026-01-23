@@ -2,6 +2,7 @@ package kr.co.raildock.raildock_server.detect.controller
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.tags.Tag
 import kr.co.raildock.raildock_server.detect.dto.DetectCreateResponse
 import kr.co.raildock.raildock_server.detect.dto.DetectVideoGetResponse
 import kr.co.raildock.raildock_server.detect.dto.ProblemDetectionGetResponse
@@ -13,6 +14,10 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
+@Tag(
+    name = "Detect",
+    description = "결함 탐지 관리"
+)
 @RestController
 @RequestMapping("/detect")
 class DetectController(

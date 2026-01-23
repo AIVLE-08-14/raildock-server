@@ -1,6 +1,8 @@
 package kr.co.raildock.raildock_server.file.entity
 
 import jakarta.persistence.*
+import kr.co.raildock.raildock_server.file.enum.FileStatus
+import kr.co.raildock.raildock_server.file.enum.FileType
 import org.hibernate.annotations.CreationTimestamp
 import java.time.LocalDateTime
 
@@ -43,10 +45,4 @@ class FileEntity(
     }
 }
 
-enum class FileType {
-    IMAGE, VIDEO, JSON
-}
 
-enum class FileStatus {
-    ACTIVE, DELETED
-}
