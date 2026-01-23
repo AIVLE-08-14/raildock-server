@@ -1,5 +1,6 @@
 package kr.co.raildock.raildock_server.file.controller
 
+import io.swagger.v3.oas.annotations.tags.Tag
 import kr.co.raildock.raildock_server.file.dto.UploadFileResponse
 import kr.co.raildock.raildock_server.file.enum.FileType
 import kr.co.raildock.raildock_server.file.service.FileService
@@ -8,6 +9,10 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 // TODO : cloud front 방식으로 업그레이드하기
+@Tag(
+    name = "Files",
+    description = "파일관리 테스트용 controller"
+)
 @RestController
 @RequestMapping("/api/files")
 class FileController(

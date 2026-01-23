@@ -1,5 +1,6 @@
 package kr.co.raildock.raildock_server.maintDoc.controller
 
+import io.swagger.v3.oas.annotations.tags.Tag
 import kr.co.raildock.raildock_server.maintDoc.dto.MaintDocumentCreateRequestDTO
 import kr.co.raildock.raildock_server.maintDoc.dto.MaintDocumentResponseDTO
 import kr.co.raildock.raildock_server.maintDoc.dto.MaintDocumentUpdateRequestDTO
@@ -9,6 +10,10 @@ import org.springframework.data.domain.Page
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 
+@Tag(
+    name = "Document",
+    description = "유지보수 문서 관리"
+)
 @RestController
 @RequestMapping("/maint-documents")
 class MaintDocumentController(
