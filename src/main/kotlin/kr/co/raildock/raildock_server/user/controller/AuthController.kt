@@ -35,7 +35,7 @@ class AuthController(
         @Valid @RequestBody req: SignUpRequestDTO
     ): ResponseEntity<ApiResponse<Unit>> {
         userService.signUp(req)
-        return ResponseEntity.ok(ApiResponse.ok("회원가입 완료"))
+        return ResponseEntity.ok(ApiResponse.success("회원가입 완료"))
     }
 
     @PostMapping("/login")
@@ -60,7 +60,7 @@ class AuthController(
             context
         )
 
-        return ResponseEntity.ok(ApiResponse.ok("로그인 성공"))
+        return ResponseEntity.ok(ApiResponse.success("로그인 성공"))
     }
 
     @PostMapping("/logout")
@@ -70,7 +70,7 @@ class AuthController(
     ): ResponseEntity<ApiResponse<Unit>> {
         SecurityContextHolder.clearContext()
         request.getSession(false)?.invalidate()
-        return ResponseEntity.ok(ApiResponse.ok("로그아웃 성공"))
+        return ResponseEntity.ok(ApiResponse.success("로그아웃 성공"))
     }
 
     @GetMapping("/me")
@@ -79,7 +79,7 @@ class AuthController(
         @AuthenticationPrincipal principal: UserPrincipal
     ): ResponseEntity<ApiResponse<MeResponseDTO>?> {
         val user = userService.getUser(principal.userId)
-        return ResponseEntity.ok(ApiResponse.ok(MeResponseDTO.from(user)))
+        return ResponseEntity.ok(ApiResponse.success(MeResponseDTO.from(user)))
     }
 
 }
