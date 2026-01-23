@@ -1,6 +1,6 @@
 package kr.co.raildock.raildock_server.file.dto
 
-import kr.co.raildock.raildock_server.file.entity.FileType
+import kr.co.raildock.raildock_server.file.enum.FileType
 
 data class UploadFileResponse(
     val fileId: Long,

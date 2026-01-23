@@ -3,7 +3,7 @@ package kr.co.raildock.raildock_server.file.service
 import kr.co.raildock.raildock_server.config.S3Properties
 import kr.co.raildock.raildock_server.file.dto.UploadFileResponse
 import kr.co.raildock.raildock_server.file.entity.FileEntity
-import kr.co.raildock.raildock_server.file.entity.FileType
+import kr.co.raildock.raildock_server.file.enum.FileType
 import kr.co.raildock.raildock_server.file.repository.FileRepository
 import org.springframework.core.io.InputStreamResource
 import org.springframework.core.io.Resource
