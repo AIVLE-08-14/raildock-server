@@ -8,6 +8,7 @@ import kr.co.raildock.raildock_server.common.ApiResponse
 import kr.co.raildock.raildock_server.user.dto.LoginRequestDTO
 import kr.co.raildock.raildock_server.user.dto.MeResponseDTO
 import kr.co.raildock.raildock_server.user.dto.SignUpRequestDTO
+import kr.co.raildock.raildock_server.user.dto.UserUpdateRequestDTO
 import kr.co.raildock.raildock_server.user.service.UserPrincipal
 import kr.co.raildock.raildock_server.user.service.UserService
 import org.springframework.http.ResponseEntity
@@ -25,8 +26,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/auth")
 class AuthController(
-    private val userService: UserService,
-    private val authenticationManager: AuthenticationManager
+    private val userService: UserService
 ) {
 
     @PostMapping("/signup")
@@ -45,21 +45,7 @@ class AuthController(
         request: HttpServletRequest
     ): ResponseEntity<ApiResponse<Unit>> {
 
-        val authentication = authenticationManager.authenticate(
-            UsernamePasswordAuthenticationToken(
-                req.employeeId,
-                req.password
-            )
-        )
-
-        val context = SecurityContextHolder.createEmptyContext()
-        context.authentication = authentication
-
-        request.session.setAttribute(
-            HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
-            context
-        )
-
+        userService.login(req, request)
         return ResponseEntity.ok(ApiResponse.success("로그인 성공"))
     }
 
@@ -82,4 +68,30 @@ class AuthController(
         return ResponseEntity.ok(ApiResponse.success(MeResponseDTO.from(user)))
     }
 
+    @PatchMapping("/me")
+    @Operation(summary = "내 정보 수정")
+    fun updateMe(
+        @AuthenticationPrincipal principal: UserPrincipal,
+        @Valid @RequestBody req: UserUpdateRequestDTO
+    ): ResponseEntity<ApiResponse<Unit>> {
+
+        userService.updateMe(principal.userId, req)
+        return ResponseEntity.ok(ApiResponse.success("정보 수정 완료"))
+    }
+
+    @DeleteMapping("/me")
+    @Operation(summary = "회원 탈퇴")
+    fun deleteMe(
+        @AuthenticationPrincipal principal: UserPrincipal,
+        request: HttpServletRequest
+    ): ResponseEntity<ApiResponse<Unit>> {
+
+        userService.deleteMe(principal.userId)
+
+        // 세션 정리
+        SecurityContextHolder.clearContext()
+        request.getSession(false)?.invalidate()
+
+        return ResponseEntity.ok(ApiResponse.success("회원 탈퇴 완료"))
+    }
 }

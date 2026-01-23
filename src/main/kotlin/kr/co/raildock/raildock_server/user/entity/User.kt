@@ -16,17 +16,17 @@ class User(
     val employeeId: String,
 
     @Column(unique = true)
-    val email: String,
+    var email: String,
 
     @Column(unique = true)
-    val phoneNumber: String,
+    var phoneNumber: String,
 
     @Column(nullable = false)
     @JsonProperty(access = Access.WRITE_ONLY)
     var passwordHash: String,
 
     @Column(nullable = false)
-    val name: String,
+    var name: String,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
