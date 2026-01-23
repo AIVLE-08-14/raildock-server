@@ -18,9 +18,7 @@ class CustomUserDetails(
 
     // 권한 목록 (ROLE_ prefix 필수)
     override fun getAuthorities(): Collection<GrantedAuthority> =
-        user.roles.map { role ->
-            SimpleGrantedAuthority("ROLE_$role")
-        }
+        listOf(SimpleGrantedAuthority("ROLE_${user.role.name}"))
 
     // 계정 만료 여부
     override fun isAccountNonExpired(): Boolean = true

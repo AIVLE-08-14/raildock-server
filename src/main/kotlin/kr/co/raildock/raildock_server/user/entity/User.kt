@@ -28,6 +28,7 @@ class User(
     @Column(nullable = false)
     val name: String,
 
-    @Column(name = "role")
-    var roles: MutableSet<String> = mutableSetOf("USER")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    var role: Role = Role.WORKER
 )
