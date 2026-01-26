@@ -38,7 +38,7 @@ class DocumentController(
     /* =========================
         문서 수정
     ========================= */
-    @PutMapping("/{documentId}")
+    @PatchMapping("/{documentId}")
     fun updateDocument(
         @PathVariable documentId: UUID,
         @RequestBody request: DocumentUpdateRequest
@@ -74,4 +74,30 @@ class DocumentController(
         documentService.addRevision(documentId, file)
         return ResponseEntity.ok().build()
     }
+
+    /* =========================
+    개정 이력 수정 (changeLog)
+    ========================= */
+    @PutMapping("/{documentId}/revisions/{revisionId}")
+    fun updateRevision(
+        @PathVariable documentId: UUID,
+        @PathVariable revisionId: UUID,
+        @RequestBody request: DocumentRevisionUpdateRequest
+    ): ResponseEntity<Void> {
+        documentService.updateRevision(documentId, revisionId, request)
+        return ResponseEntity.ok().build()
+    }
+
+    /* =========================
+    개정 이력 삭제 (최신만)
+    ========================= */
+    @DeleteMapping("/{documentId}/revisions/{revisionId}")
+    fun deleteRevision(
+        @PathVariable documentId: UUID,
+        @PathVariable revisionId: UUID
+    ): ResponseEntity<Void> {
+        documentService.deleteRevision(documentId, revisionId)
+        return ResponseEntity.noContent().build()
+    }
+
 }

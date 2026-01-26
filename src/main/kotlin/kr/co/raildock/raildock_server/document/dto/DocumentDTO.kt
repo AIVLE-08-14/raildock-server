@@ -63,3 +63,7 @@ data class DocumentUpdateRequest(
     val name: String?,
     val description: String?
 )
+
+data class DocumentRevisionUpdateRequest(
+    val changeLog: String?
+)

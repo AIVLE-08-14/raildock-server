@@ -11,4 +11,9 @@ interface DocumentRevisionRepository : JpaRepository<DocumentRevision, UUID> {
     fun findTopByDocumentIdOrderByRevisionVersionDesc(documentId: UUID): DocumentRevision?
 
     fun deleteByDocumentId(documentId: UUID)
+
+    fun findByIdAndDocumentId(
+        id: UUID,
+        documentId: UUID
+    ): DocumentRevision?
 }

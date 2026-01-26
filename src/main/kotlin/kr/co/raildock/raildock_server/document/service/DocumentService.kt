@@ -155,9 +155,44 @@ class DocumentService(
         val document = documentRepository.findById(documentId)
             .orElseThrow { IllegalArgumentException("Document not found") }
 
-        // 🔴 주의: revision 먼저 삭제
+        // revision 먼저 삭제
         revisionRepository.deleteByDocumentId(documentId)
 
         documentRepository.delete(document)
     }
+
+    @Transactional
+    fun updateRevision(
+        documentId: UUID,
+        revisionId: UUID,
+        request: DocumentRevisionUpdateRequest
+    ) {
+        val revision = revisionRepository
+            .findByIdAndDocumentId(revisionId, documentId)
+            ?: throw IllegalArgumentException("Revision not found")
+
+        // changeLog만 수정 허용
+        revision.changeLog = request.changeLog
+    }
+
+    @Transactional
+    fun deleteRevision(
+        documentId: UUID,
+        revisionId: UUID
+    ) {
+        val latestRevision =
+            revisionRepository.findTopByDocumentIdOrderByRevisionVersionDesc(documentId)
+                ?: throw IllegalArgumentException("No revisions found")
+
+        if (latestRevision.id != revisionId) {
+            throw IllegalStateException("Only latest revision can be deleted")
+        }
+
+        revisionRepository.delete(latestRevision)
+
+        // 파일까지 같이 삭제
+         fileService.deleteFile(latestRevision.fileId)
+    }
+
+
 }
