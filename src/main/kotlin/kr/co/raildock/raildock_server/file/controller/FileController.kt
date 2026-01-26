@@ -36,6 +36,13 @@ class FileController(
         return fileService.download(fileId)
     }
 
+    @GetMapping("/{fileId}/download-url")
+    fun getDownloadUrl(
+        @PathVariable fileId: Long
+    ): ResponseEntity<String> {
+        return fileService.getdownloadURL(fileId)
+    }
+
     @DeleteMapping("/{fileId}")
     fun deleteFile(
         @PathVariable fileId: Long

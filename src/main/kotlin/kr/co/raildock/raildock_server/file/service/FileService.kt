@@ -14,5 +14,7 @@ interface FileService {
 
     fun download(fileId: Long): ResponseEntity<Resource>
 
+    fun getdownloadURL(fileId: Long): ResponseEntity<String>
+
     fun deleteFile(fileId: Long)
 }
