@@ -1,8 +1,10 @@
 package kr.co.raildock.raildock_server.document.service
 
+import kr.co.raildock.raildock_server.common.exception.BusinessException
 import kr.co.raildock.raildock_server.document.dto.*
 import kr.co.raildock.raildock_server.document.entity.Document
 import kr.co.raildock.raildock_server.document.entity.DocumentRevision
+import kr.co.raildock.raildock_server.document.exception.DocumentErrorCode
 import kr.co.raildock.raildock_server.document.repository.DocumentRepository
 import kr.co.raildock.raildock_server.document.repository.DocumentRevisionRepository
 import kr.co.raildock.raildock_server.file.enum.FileType
@@ -40,32 +42,39 @@ class DocumentService(
     }
 
     /* =========================
-       문서 상세 + 연혁
+       문서 상세 + 최신 + 이력
     ========================= */
     @Transactional(readOnly = true)
     fun getDocumentDetail(documentId: UUID): DocumentDetailDto {
         val document = documentRepository.findById(documentId)
-            .orElseThrow { IllegalArgumentException("Document not found") }
+            .orElseThrow { BusinessException(DocumentErrorCode.DOCUMENT_NOT_FOUND) }
 
-        val revisions = revisionRepository
-            .findByDocumentIdOrderByRevisionVersionDesc(documentId)
-            .map {
-                DocumentRevisionDto(
-                    revisionId = it.id!!,
-                    version = it.revisionVersion,
-                    changeLog = it.changeLog,
-                    createdAt = it.createdAt,
-                    createdBy = it.createdBy,
-                    downloadUrl = fileService.getdownloadURL(it.fileId).toString()
-                )
-            }
+        val revisions =
+            revisionRepository.findByDocumentIdOrderByRevisionVersionDesc(documentId)
+
+        if (revisions.isEmpty()) {
+            throw BusinessException(DocumentErrorCode.DOCUMENT_HAS_NO_REVISION)
+        }
+
+        val latest = revisions.first()
+        val history = revisions.drop(1)
+
+        fun toDto(it: DocumentRevision) = DocumentRevisionDto(
+            revisionId = it.id!!,
+            version = it.revisionVersion,
+            changeLog = it.changeLog,
+            createdAt = it.createdAt,
+            createdBy = it.createdBy,
+            downloadUrl = fileService.getdownloadURL(it.fileId).body!!
+        )
 
         return DocumentDetailDto(
             id = document.id!!,
             name = document.name,
             description = document.description,
             createdAt = document.createdAt,
-            revisions = revisions
+            latestRevision = toDto(latest),
+            history = history.map { toDto(it) }
         )
     }
 
@@ -74,6 +83,10 @@ class DocumentService(
     ========================= */
     @Transactional
     fun createDocument(request: DocumentCreateRequest): UUID {
+        if (documentRepository.existsByName(request.name)) {
+            throw BusinessException(DocumentErrorCode.DUPLICATE_DOCUMENT_NAME)
+        }
+
         val document = documentRepository.save(
             Document(
                 name = request.name,
@@ -83,64 +96,20 @@ class DocumentService(
         return document.id!!
     }
 
-    @Transactional
-    fun addRevision(
-        documentId: UUID,
-        file: MultipartFile
-    ) {
-        // 1️⃣ 문서 존재 확인
-        val document = documentRepository.findById(documentId)
-            .orElseThrow { IllegalArgumentException("Document not found") }
-
-        // 2️⃣ 파일 타입 검증 (PDF만 허용)
-        validatePdf(file)
-
-        // 3️⃣ 파일 업로드 → fileId 획득
-        val uploadResponse = fileService.upload(
-            file = file,
-            fileType = FileType.PDF
-        )
-        val fileId = uploadResponse.fileId
-
-        // 4️⃣ 작성자 (로그인 사용자)
-        val createdBy = userService.getMyId()
-
-        // 5️⃣ 다음 revisionVersion 계산
-        val nextVersion =
-            (revisionRepository.findTopByDocumentIdOrderByRevisionVersionDesc(documentId)
-                ?.revisionVersion ?: 0) + 1
-
-        // 6️⃣ 개정 이력 저장
-        revisionRepository.save(
-            DocumentRevision(
-                document = document,
-                revisionVersion = nextVersion,
-                createdBy = createdBy,
-                fileId = fileId
-            )
-        )
-    }
-
-    private fun validatePdf(file: MultipartFile) {
-        val contentType = file.contentType ?: ""
-
-        if (contentType != "application/pdf") {
-            throw IllegalArgumentException("Only PDF files are allowed")
-        }
-    }
-
+    /* =========================
+       문서 수정
+    ========================= */
     @Transactional
     fun updateDocument(
         documentId: UUID,
         request: DocumentUpdateRequest
     ) {
         val document = documentRepository.findById(documentId)
-            .orElseThrow { IllegalArgumentException("Document not found") }
+            .orElseThrow { BusinessException(DocumentErrorCode.DOCUMENT_NOT_FOUND) }
 
         request.name?.let {
-            // 이름 중복 체크
             if (it != document.name && documentRepository.existsByName(it)) {
-                throw IllegalArgumentException("Duplicate document name")
+                throw BusinessException(DocumentErrorCode.DUPLICATE_DOCUMENT_NAME)
             }
             document.name = it
         }
@@ -150,17 +119,57 @@ class DocumentService(
         }
     }
 
+    /* =========================
+       문서 삭제
+    ========================= */
     @Transactional
     fun deleteDocument(documentId: UUID) {
         val document = documentRepository.findById(documentId)
-            .orElseThrow { IllegalArgumentException("Document not found") }
+            .orElseThrow { BusinessException(DocumentErrorCode.DOCUMENT_NOT_FOUND) }
 
-        // revision 먼저 삭제
         revisionRepository.deleteByDocumentId(documentId)
-
         documentRepository.delete(document)
     }
 
+    /* =========================
+       개정 추가 (PDF)
+    ========================= */
+    @Transactional
+    fun addRevision(
+        documentId: UUID,
+        file: MultipartFile
+    ) {
+        val document = documentRepository.findById(documentId)
+            .orElseThrow { BusinessException(DocumentErrorCode.DOCUMENT_NOT_FOUND) }
+
+        if (file.contentType != "application/pdf") {
+            throw BusinessException(DocumentErrorCode.INVALID_FILE_TYPE)
+        }
+
+        val uploadResponse = fileService.upload(
+            file = file,
+            fileType = FileType.PDF
+        )
+
+        val createdBy = userService.getMyId()
+
+        val nextVersion =
+            (revisionRepository.findTopByDocumentIdOrderByRevisionVersionDesc(documentId)
+                ?.revisionVersion ?: 0) + 1
+
+        revisionRepository.save(
+            DocumentRevision(
+                document = document,
+                revisionVersion = nextVersion,
+                createdBy = createdBy,
+                fileId = uploadResponse.fileId
+            )
+        )
+    }
+
+    /* =========================
+       개정 로그 수정
+    ========================= */
     @Transactional
     fun updateRevision(
         documentId: UUID,
@@ -169,12 +178,14 @@ class DocumentService(
     ) {
         val revision = revisionRepository
             .findByIdAndDocumentId(revisionId, documentId)
-            ?: throw IllegalArgumentException("Revision not found")
+            ?: throw BusinessException(DocumentErrorCode.REVISION_NOT_FOUND)
 
-        // changeLog만 수정 허용
         revision.changeLog = request.changeLog
     }
 
+    /* =========================
+       개정 삭제 (최신만)
+    ========================= */
     @Transactional
     fun deleteRevision(
         documentId: UUID,
@@ -182,17 +193,13 @@ class DocumentService(
     ) {
         val latestRevision =
             revisionRepository.findTopByDocumentIdOrderByRevisionVersionDesc(documentId)
-                ?: throw IllegalArgumentException("No revisions found")
+                ?: throw BusinessException(DocumentErrorCode.DOCUMENT_HAS_NO_REVISION)
 
         if (latestRevision.id != revisionId) {
-            throw IllegalStateException("Only latest revision can be deleted")
+            throw BusinessException(DocumentErrorCode.ONLY_LATEST_REVISION_CAN_BE_DELETED)
         }
 
         revisionRepository.delete(latestRevision)
-
-        // 파일까지 같이 삭제
-         fileService.deleteFile(latestRevision.fileId)
+        fileService.deleteFile(latestRevision.fileId)
     }
-
-
 }
