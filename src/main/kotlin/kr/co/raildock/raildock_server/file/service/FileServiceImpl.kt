@@ -31,6 +31,39 @@ class FileServiceImpl(
         val contentType = file.contentType ?: "application/octet-stream"
         val size = file.size
 
+        file.inputStream.use {input ->
+            return uploadInternal(
+                requestBody = RequestBody.fromInputStream(input, size),
+                size = size,
+                originalFilename = originalFilename,
+                contentType = contentType,
+                fileType = fileType
+            )
+        }
+    }
+
+    override fun uploadBytes(
+        bytes: ByteArray,
+        originalFilename: String,
+        contentType: String,
+        fileType: FileType
+    ): UploadFileResponse {
+        return uploadInternal(
+            requestBody = RequestBody.fromBytes(bytes),
+            size = bytes.size.toLong(),
+            originalFilename = originalFilename,
+            contentType = contentType,
+            fileType = fileType
+        )
+    }
+
+    private fun uploadInternal(
+        requestBody: RequestBody,
+        size: Long,
+        originalFilename: String,
+        contentType: String,
+        fileType: FileType
+    ): UploadFileResponse {
         val s3Key = generateS3Key(fileType, originalFilename)
 
         val putReq = PutObjectRequest.builder()
@@ -38,13 +71,7 @@ class FileServiceImpl(
             .key(s3Key)
             .contentType(contentType)
             .build()
-
-        file.inputStream.use { input ->
-            s3Client.putObject(
-                putReq,
-                RequestBody.fromInputStream(input, size)
-            )
-        }
+        s3Client.putObject(putReq, requestBody)
 
         val saved = fileRepository.save(
             FileEntity(
@@ -77,6 +104,13 @@ class FileServiceImpl(
         val url = "${awsProperties.cloudfront.domain}/${file.s3Key}"
 
         return ResponseEntity.ok(url)
+    }
+
+    // !!!이게 새로 만든거!!!
+    override fun getDownloadUrl(fileId: Long): String{
+        val file = fileRepository.findByIdAndStatus(fileId)
+            ?: throw IllegalArgumentException("파일이 존재하지 않습니다.")
+        return "${awsProperties.cloudfront.domain}/${file.s3Key}"
     }
 
     /**
