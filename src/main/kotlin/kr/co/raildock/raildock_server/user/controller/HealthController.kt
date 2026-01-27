@@ -1,6 +1,7 @@
 package kr.co.raildock.raildock_server.user.controller
 
 import io.swagger.v3.oas.annotations.tags.Tag
+import kr.co.raildock.raildock_server.detect.service.FastApiClientImpl
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -9,8 +10,15 @@ import org.springframework.web.bind.annotation.RestController
     description = "서버 상태 체크용 controller"
 )
 @RestController
-class HealthController {
+class HealthController(
+    private val fastApiClient: FastApiClientImpl
+) {
     @GetMapping("/health")
     fun health(): Map<String, Any> =
         mapOf("status" to "UP")
+    @GetMapping("/health/infer")
+    fun inferHealth(): Map<String, Any> {
+        fastApiClient.inferHealthCheck()
+        return mapOf("FastAPI" to "UP")
+    }
 }

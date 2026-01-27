@@ -35,7 +35,7 @@ logging:
     org.springframework.security: DEBUG
 
 fastapi:
-  url: http://localhost:8000
+  url: http://hsyoon14.iptime.org:18000
 aws:
   region: ap-northeast-2
   s3:

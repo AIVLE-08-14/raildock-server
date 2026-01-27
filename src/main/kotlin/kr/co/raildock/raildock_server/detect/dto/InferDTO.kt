@@ -9,7 +9,6 @@ data class FastAPIInferRequest(
     val stride: Int? = 5
 )
 
-data class InferResponse(
+data class InferHealthResponse(
     val ok: Boolean,
-    val defects: List<Any> = emptyList() // 다음 단계에서 Defect DTO로 구현
 )

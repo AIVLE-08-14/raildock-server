@@ -18,4 +18,4 @@ springdoc:
     enabled: true   # 운영에서 끌 거면 false로
 
 fastapi:
-  url: http://fastapi:8000 # 추후 수정
+  url: http://hsyoon14.iptime.org:18000

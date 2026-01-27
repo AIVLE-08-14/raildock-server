@@ -1,6 +1,7 @@
 package kr.co.raildock.raildock_server.detect.service
 
 import kr.co.raildock.raildock_server.detect.dto.FastAPIInferRequest
+import kr.co.raildock.raildock_server.detect.dto.InferHealthResponse
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
@@ -55,5 +56,17 @@ class FastApiClientImpl(
             }
             .timeout(Duration.ofMinutes(30))
             .block() ?: throw IllegalStateException("FastAPI returned empty body")
+    }
+
+    override fun inferHealthCheck(): InferHealthResponse {
+        log.info("FastAPI infer health check")
+
+        return client.get()
+            .uri("/health")
+            .accept(MediaType.APPLICATION_JSON)
+            .retrieve()
+            .bodyToMono(InferHealthResponse::class.java)
+            .timeout(Duration.ofSeconds(10))
+            .block() ?: throw IllegalStateException("FastAPI /health returned empty body")
     }
 }
