@@ -4,10 +4,8 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import kr.co.raildock.raildock_server.detect.dto.DetectCreateResponse
-import kr.co.raildock.raildock_server.detect.dto.DetectVideoGetResponse
 import kr.co.raildock.raildock_server.detect.dto.ProblemDetectionGetResponse
 import kr.co.raildock.raildock_server.detect.dto.ProblemDetectionListResponse
-import kr.co.raildock.raildock_server.detect.repository.ProblemDetectionRepository
 import kr.co.raildock.raildock_server.detect.service.DetectService
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -22,7 +20,6 @@ import org.springframework.web.multipart.MultipartFile
 @RequestMapping("/detect")
 class DetectController(
     private val service: DetectService,
-    private val problemDetectionRepository: ProblemDetectionRepository
 ) {
     /*
     최소 검증?
@@ -39,7 +36,7 @@ class DetectController(
         @Parameter(description = "촬영 위치 및 구간", required = true)
         @RequestParam("section") section: String,
 
-        @Parameter(description = "촬영 시각", required = true)
+        @Parameter(description = "촬영 시각(ISO-8601)", required = true)
         @RequestParam("datetime") datetime: String,
 
         @Parameter(description = "방향", required = true)
@@ -98,14 +95,5 @@ class DetectController(
         @PathVariable("problemDetectionId") id: Long
     ): ResponseEntity<ProblemDetectionGetResponse>{
         return ResponseEntity.ok(service.getProblemDetection(id))
-    }
-
-
-    @Operation(summary = "단일 Detection Video 작업 상태 및 결과 조회")
-    @GetMapping("/video/{detectionVideoId}")
-    fun getDetectionVideo(
-        @PathVariable("detectionVideoId") videoId: Long
-    ): ResponseEntity<DetectVideoGetResponse>{
-        return ResponseEntity.ok(service.getDetectionVideo(videoId))
     }
 }

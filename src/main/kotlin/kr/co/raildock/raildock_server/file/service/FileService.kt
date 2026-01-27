@@ -13,9 +13,19 @@ interface FileService {
         fileType: FileType
     ): UploadFileResponse
 
+    fun uploadBytes(
+        bytes: ByteArray,
+        originalFilename: String,
+        contentType: String,
+        fileType: FileType
+    ): UploadFileResponse
+
     fun download(fileId: Long): ResponseEntity<Resource>
 
     fun getdownloadURL(fileId: Long): ResponseEntity<String>
+
+    // !!! 이게 새로 만든거 !!!
+    fun getDownloadUrl(fileId: Long): String
 
     fun deleteFile(fileId: Long)
 

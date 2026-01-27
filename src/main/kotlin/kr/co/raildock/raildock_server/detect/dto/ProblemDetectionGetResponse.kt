@@ -8,11 +8,12 @@ data class ProblemDetectionGetResponse(
     val direction: String,
     val weather: String?,
     val temperature: Int?,
-    val videos: List<DetectVideoSummaryDto>
-)
-
-data class DetectVideoSummaryDto(
-    val videoId: Long,
-    val videoType: String,
-    val status: String
+    val humidity: Int?,
+    val metadataUrl: String?,
+    val insulatorVideoUrl: String?,
+    val railVideoUrl: String?,
+    val nestVideoUrl: String?,
+    val taskStatus: String,
+    val errorMessage: String?,
+    val resultZipUrl: String?
 )
