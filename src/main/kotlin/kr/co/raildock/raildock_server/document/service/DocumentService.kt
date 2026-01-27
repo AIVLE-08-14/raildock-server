@@ -50,10 +50,6 @@ class DocumentService(
         val revisions =
             revisionRepository.findByDocumentIdOrderByRevisionVersionDesc(documentId)
 
-        if (revisions.isEmpty()) {
-            throw BusinessException(DocumentErrorCode.DOCUMENT_HAS_NO_REVISION)
-        }
-
         fun toDto(it: DocumentRevision) = DocumentRevisionDto(
             revisionId = it.id!!,
             version = it.revisionVersion,
