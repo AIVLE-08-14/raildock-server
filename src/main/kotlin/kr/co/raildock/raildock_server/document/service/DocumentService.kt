@@ -56,9 +56,6 @@ class DocumentService(
             throw BusinessException(DocumentErrorCode.DOCUMENT_HAS_NO_REVISION)
         }
 
-        val latest = revisions.first()
-        val history = revisions.drop(1)
-
         fun toDto(it: DocumentRevision) = DocumentRevisionDto(
             revisionId = it.id!!,
             version = it.revisionVersion,
@@ -73,8 +70,7 @@ class DocumentService(
             name = document.name,
             description = document.description,
             createdAt = document.createdAt,
-            latestRevision = toDto(latest),
-            history = history.map { toDto(it) }
+            history = revisions.map { toDto(it) }
         )
     }
 

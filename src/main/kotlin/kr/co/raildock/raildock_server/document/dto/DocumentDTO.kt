@@ -15,7 +15,6 @@ data class DocumentDetailDto(
     val name: String,
     val description: String,
     val createdAt: LocalDateTime,
-    val latestRevision: DocumentRevisionDto,
     val history: List<DocumentRevisionDto>
 )
 
