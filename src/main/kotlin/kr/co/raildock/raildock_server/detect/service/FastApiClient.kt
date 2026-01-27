@@ -1,8 +1,9 @@
 package kr.co.raildock.raildock_server.detect.service
 
-import kr.co.raildock.raildock_server.detect.dto.InferRequest
+import kr.co.raildock.raildock_server.detect.dto.FastAPIInferRequest
 import kr.co.raildock.raildock_server.detect.dto.InferResponse
 
 interface FastApiClient {
-    fun infer(req: InferRequest): InferResponse
+    // TODO: Zip파일 그대로 쓸껀지...
+    fun infer(req: FastAPIInferRequest): ByteArray
 }

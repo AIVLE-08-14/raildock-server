@@ -1,9 +1,5 @@
 package kr.co.raildock.raildock_server.detect.domain
 
-enum class DetectJobStatus {
+enum class DetectStatus {
     PENDING, RUNNING, COMPLETED, FAILED
-}
-
-enum class VideoType {
-    INSULATOR, RAIL, NEST
 }

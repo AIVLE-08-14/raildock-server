@@ -1,66 +1,84 @@
 package kr.co.raildock.raildock_server.detect.service
 
-import kr.co.raildock.raildock_server.detect.domain.DetectJobStatus
-import kr.co.raildock.raildock_server.detect.dto.InferRequest
-import kr.co.raildock.raildock_server.detect.repository.DetectionVideoRepository
-import org.springframework.scheduling.annotation.Scheduled
+import kr.co.raildock.raildock_server.detect.domain.DetectStatus
+import kr.co.raildock.raildock_server.detect.dto.FastAPIInferRequest
+import kr.co.raildock.raildock_server.detect.repository.ProblemDetectionRepository
+import kr.co.raildock.raildock_server.file.enum.FileType
+import kr.co.raildock.raildock_server.file.service.FileService
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import java.time.OffsetDateTime
 
 @Component
 class DetectWorker(
-    private val videoRepo: DetectionVideoRepository,
-    private val fastapi: FastApiClient
+    private val detectRepo: ProblemDetectionRepository,
+    private val fileService: FileService,
+    private val fastApiClient: FastApiClientImpl,
 ) {
 
-    @Scheduled(fixedDelay = 2000)
-    fun tick(){
-        val targets = videoRepo.findTop10ByTaskStatusOrderByCreatedAtAsc(DetectJobStatus.PENDING)
-        for (v in targets){
-            runOne(v.id!!)
-        }
-    }
+    @Transactional
+    fun processOnePending(): Boolean {
 
-    fun runOne(videoId: Long){
-        if (!start(videoId)) return
+        // 1. 후보 조회 (가장 최근 PENDING 작업 하나 조회)
+        val candidate = detectRepo.findTopByTaskStatusOrderByDatetimeDesc(DetectStatus.PENDING)
+            ?: return false
+
+        // 2. 선점(RUNNING 으로 상태 변경 시도)
+        val claimed = detectRepo.tryStart(
+            id = candidate.id!!,
+            from = DetectStatus.PENDING,
+            to = DetectStatus.RUNNING
+        )
+        if (claimed == 0) {
+            return true // 선점 실패시 다음 루프에서 시도
+        }
+
+        // 3. 선점 성공시 재 조회(영속 상태)
+        val pd = detectRepo.findById(candidate.id!!).orElseThrow()
 
         try{
-            val v = videoRepo.findById(videoId).orElseThrow()
-            val pd = v.problemDetection
 
-            val req = InferRequest(
-                videoId = videoId,
-                videoType = v.videoType.name,
-                videoUrl = v.videoURL
+            // 4. 파일 다운로드 URL 받기
+            val railUrl = pd.railVideoFileId?.let { fileService.getDownloadUrl(it) }
+            val insulatorUrl = pd.insulatorVideoFileId?.let { fileService.getDownloadUrl(it) }
+            val nestUrl = pd.nestVideoFileId?.let { fileService.getDownloadUrl(it) }
+
+            // 최소 조건 체크
+            if (railUrl == null && insulatorUrl == null && nestUrl == null) {
+                pd.taskStatus = DetectStatus.FAILED
+                pd.errorMessage = "No Video fileId found. At least one video is required for processing"
+                return true
+            }
+
+            // 5. FastAPI 에 추론 요청
+            val req = FastAPIInferRequest(
+                rail_mp4 = railUrl,
+                insulator_mp4 = insulatorUrl,
+                nest_mp4 = nestUrl,
+                conf = 0.25,
+                iou = 0.7,
+                stride = 5
             )
-            val resp = fastapi.infer(req)
 
-            // TODO: Defect 저장
+            // TODO: Zip 파일 처리 한거 나중에 고려
+            val zipBytes = fastApiClient.infer(req)
+            val result = fileService.uploadBytes(
+                bytes = zipBytes,
+                originalFilename = "detection_result_${pd.id}.zip",
+                contentType = "application/zip",
+                fileType = FileType.ZIP
+            )
+            pd.resultZipFileId = result.fileId
 
-            done(videoId)
-        } catch(e: Exception){
-            fail(videoId, e.message ?: "infer failed")
+            // 6. 결과 파일Id 저장 및 상태 변경
+            pd.taskStatus = DetectStatus.COMPLETED
+            pd.errorMessage = null
+            return true
+        } catch(e: Exception) {
+            // 7. 예외 처리
+            pd.taskStatus = DetectStatus.FAILED
+            pd.errorMessage = (e.message ?: e.javaClass.simpleName).take(500)
+            return true
         }
-    }
 
-    @Transactional
-    fun start(videoId: Long): Boolean{
-        return videoRepo.tryStart(videoId) == 1
-    }
-
-    @Transactional
-    fun done(videoId: Long){
-        val v = videoRepo.findById(videoId).orElseThrow()
-        v.taskStatus = DetectJobStatus.COMPLETED
-        v.completedAt = OffsetDateTime.now()
-    }
-
-    @Transactional
-    fun fail(videoId: Long, msg: String){
-        val v = videoRepo.findById(videoId).orElseThrow()
-        v.taskStatus = DetectJobStatus.FAILED
-        v.completedAt = OffsetDateTime.now()
-        v.errorMessage = msg.take(2000)
     }
 }

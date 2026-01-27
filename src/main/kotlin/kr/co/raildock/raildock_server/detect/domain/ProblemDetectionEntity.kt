@@ -30,9 +30,9 @@ class ProblemDetectionEntity(
     var railVideoFileId: Long? = null,
     var nestVideoFileId: Long? = null,
 
-    var taskStatus: DetectJobStatus = DetectJobStatus.PENDING,
+    var taskStatus: DetectStatus = DetectStatus.PENDING,
     var errorMessage: String? = null,
 
     var resultZipFileId: Long? = null,
 
-)
+    )

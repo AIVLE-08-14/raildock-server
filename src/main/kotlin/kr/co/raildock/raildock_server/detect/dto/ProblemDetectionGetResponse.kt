@@ -15,4 +15,5 @@ data class ProblemDetectionGetResponse(
     val nestVideoUrl: String?,
     val taskStatus: String,
     val errorMessage: String?,
+    val resultZipUrl: String?
 )

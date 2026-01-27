@@ -1,6 +1,4 @@
 spring:
-  profiles:
-    active: mock
   datasource:
     url: jdbc:mysql://localhost:3306/mydatabase?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: myuser
@@ -37,7 +35,7 @@ logging:
     org.springframework.security: DEBUG
 
 fastapi:
-  base-url: http://fastapi:8000
+  url: http://localhost:8000
 aws:
   region: ap-northeast-2
   s3:
@@ -45,3 +43,7 @@ aws:
   cloudfront:
     domain: https://d6enbbgppxz0x.cloudfront.net
 
+raildock:
+  detect:
+    scheduler:
+      delay: 5000

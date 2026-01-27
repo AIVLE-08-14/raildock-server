@@ -1,7 +1,7 @@
 package kr.co.raildock.raildock_server.detect.service
 
 import kr.co.raildock.raildock_server.detect.domain.ProblemDetectionEntity
-import kr.co.raildock.raildock_server.detect.domain.DetectJobStatus
+import kr.co.raildock.raildock_server.detect.domain.DetectStatus
 import kr.co.raildock.raildock_server.detect.dto.DetectCreateResponse
 import kr.co.raildock.raildock_server.detect.dto.ProblemDetectionGetResponse
 import kr.co.raildock.raildock_server.detect.dto.ProblemDetectionListItem
@@ -52,7 +52,7 @@ class DetectService(
                 humidity = humidity,
                 temperature = temperature,
                 weather = weather,
-                taskStatus = DetectJobStatus.PENDING
+                taskStatus = DetectStatus.PENDING
             )
         )
 
@@ -101,12 +101,13 @@ class DetectService(
             weather = pd.weather,
             temperature = pd.temperature,
             humidity = pd.humidity,
-            metadataUrl = pd.metadataFileId?.let { fileService.getdownloadURL(it) }.toString(),
-            insulatorVideoUrl = pd.insulatorVideoFileId?.let { fileService.getdownloadURL(it) }.toString(),
-            railVideoUrl = pd.railVideoFileId?.let { fileService.getdownloadURL(it) }.toString(),
-            nestVideoUrl = pd.nestVideoFileId?.let { fileService.getdownloadURL(it) }.toString(),
+            metadataUrl = pd.metadataFileId?.let { fileService.getDownloadUrl(it) },
+            insulatorVideoUrl = pd.insulatorVideoFileId?.let { fileService.getDownloadUrl(it) },
+            railVideoUrl = pd.railVideoFileId?.let { fileService.getDownloadUrl(it) },
+            nestVideoUrl = pd.nestVideoFileId?.let { fileService.getDownloadUrl(it) },
             taskStatus = pd.taskStatus.name,
-            errorMessage = pd.errorMessage
+            errorMessage = pd.errorMessage,
+            resultZipUrl = pd.resultZipFileId?.let { fileService.getDownloadUrl(it) }
         )
     }
 

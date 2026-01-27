@@ -18,4 +18,4 @@ springdoc:
     enabled: true   # 운영에서 끌 거면 false로
 
 fastapi:
-  base-url: http://fastapi:8000 # 추후 수정
+  url: http://fastapi:8000 # 추후 수정
