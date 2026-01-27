@@ -3,7 +3,7 @@ package kr.co.raildock.raildock_server.document.controller
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import kr.co.raildock.raildock_server.document.dto.*
-import kr.co.raildock.raildock_server.document.service.DocumentService
+import kr.co.raildock.raildock_server.document.service.DocumentServiceImpl
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
@@ -16,7 +16,7 @@ import java.util.UUID
 @RestController
 @RequestMapping("/documents")
 class DocumentController(
-    private val documentService: DocumentService
+    private val documentService: DocumentServiceImpl
 ) {
 
     @GetMapping("/list")

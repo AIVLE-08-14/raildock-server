@@ -12,7 +12,14 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Entity
-@Table(name = "document_revisions")
+@Table(
+    name = "document_revisions",
+    uniqueConstraints = [
+        jakarta.persistence.UniqueConstraint(
+            columnNames = ["document_id", "revision_version"]
+        )
+    ]
+) // document_id와 revision_version의 충돌 방지
 class DocumentRevision(
 
     @Id
