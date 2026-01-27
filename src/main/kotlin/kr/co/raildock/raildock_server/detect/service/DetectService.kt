@@ -2,16 +2,10 @@ package kr.co.raildock.raildock_server.detect.service
 
 import kr.co.raildock.raildock_server.detect.domain.ProblemDetectionEntity
 import kr.co.raildock.raildock_server.detect.domain.DetectJobStatus
-import kr.co.raildock.raildock_server.detect.domain.DetectionVideoEntity
-import kr.co.raildock.raildock_server.detect.domain.VideoType
 import kr.co.raildock.raildock_server.detect.dto.DetectCreateResponse
-import kr.co.raildock.raildock_server.detect.dto.DetectVideoGetResponse
-import kr.co.raildock.raildock_server.detect.dto.DetectVideoSummaryDto
 import kr.co.raildock.raildock_server.detect.dto.ProblemDetectionGetResponse
 import kr.co.raildock.raildock_server.detect.dto.ProblemDetectionListItem
 import kr.co.raildock.raildock_server.detect.dto.ProblemDetectionListResponse
-import kr.co.raildock.raildock_server.detect.dto.VideoTaskDto
-import kr.co.raildock.raildock_server.detect.repository.DetectionVideoRepository
 import kr.co.raildock.raildock_server.detect.repository.ProblemDetectionRepository
 import kr.co.raildock.raildock_server.file.enum.FileType
 import kr.co.raildock.raildock_server.file.service.FileService
@@ -19,21 +13,13 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.StandardCopyOption
 import java.time.OffsetDateTime
-import java.util.UUID
 
 @Service
 class DetectService(
     private val detectRepo: ProblemDetectionRepository,
-    private val videoRepo: DetectionVideoRepository,
     private val fileService: FileService
 ) {
-    private val baseVideoDir: Path = Path.of("data/videos")
-    private val baseMetaDir: Path = Path.of("data/metadata")
-
     @Transactional
     fun create(
         name: String,
@@ -100,11 +86,11 @@ class DetectService(
 
     }
 
+    // 문제 탐지 상세 정보 조회
     fun getProblemDetection(id: Long): ProblemDetectionGetResponse{
         val pd = detectRepo.findById(id).orElseThrow{
             IllegalArgumentException("Problem detection with ID $id not found")
         }
-        val videos = videoRepo.findAllByProblemDetectionId(id)
 
         return ProblemDetectionGetResponse(
             id = pd.id!!,
@@ -114,42 +100,23 @@ class DetectService(
             direction = pd.direction,
             weather = pd.weather,
             temperature = pd.temperature,
-            videos = videos.map{
-                DetectVideoSummaryDto(
-                    videoId = it.id!!,
-                    videoType = it.videoType.name,
-                    status = it.taskStatus.name
-                )
-            }
+            humidity = pd.humidity,
+            metadataUrl = pd.metadataFileId?.let { fileService.getdownloadURL(it) }.toString(),
+            insulatorVideoUrl = pd.insulatorVideoFileId?.let { fileService.getdownloadURL(it) }.toString(),
+            railVideoUrl = pd.railVideoFileId?.let { fileService.getdownloadURL(it) }.toString(),
+            nestVideoUrl = pd.nestVideoFileId?.let { fileService.getdownloadURL(it) }.toString(),
+            taskStatus = pd.taskStatus.name,
+            errorMessage = pd.errorMessage
         )
     }
 
-    fun getDetectionVideo(videoId: Long): DetectVideoGetResponse{
-        val v = videoRepo.findById(videoId)
-            .orElseThrow{
-                IllegalArgumentException("Video with ID $videoId not found")
-            }
-        return DetectVideoGetResponse(
-            videoId = v.id!!,
-            videoType = v.videoType.name,
-            status = v.taskStatus.name,
-            errorMessage = v.errorMessage
-        )
-    }
-
+    // 문제 탐지 목록 조회
     fun listProblemDetections(page: Int, size: Int): ProblemDetectionListResponse {
     val pageable = PageRequest.of(page, size)
     val pdPage = detectRepo.findAllByOrderByDatetimeDesc(pageable)
     val pds = pdPage.content
 
-    val ids = pds.mapNotNull { it.id }
-    val videos = if (ids.isEmpty()) emptyList() else videoRepo.findAllByProblemDetectionIdIn(ids)
-
-    // problemDetectionId 별로 video 묶기
-    val grouped = videos.groupBy { it.problemDetection.id!! }
-
     val items = pds.map { pd ->
-        val vs = grouped[pd.id!!].orEmpty()
 
         ProblemDetectionListItem(
             id = pd.id!!,
@@ -157,16 +124,7 @@ class DetectService(
             section = pd.section,
             datetime = pd.datetime.toString(),
             direction = pd.direction,
-            weather = pd.weather,
-            humidity = pd.humidity,
-            temperature = pd.temperature,
-            videos = vs.map {
-                DetectVideoSummaryDto(
-                    videoId = it.id!!,
-                    videoType = it.videoType.name,
-                    status = it.taskStatus.name
-                )
-            }
+            taskStatus = pd.taskStatus.name
         )
     }
 

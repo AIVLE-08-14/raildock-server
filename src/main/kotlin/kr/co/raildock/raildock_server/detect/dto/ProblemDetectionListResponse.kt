@@ -10,8 +10,5 @@ data class ProblemDetectionListItem(
     val section: String,
     val datetime: String,
     val direction: String,
-    val weather: String?,
-    val humidity: Int?,
-    val temperature: Int?,
-    val videos: List<DetectVideoSummaryDto>
+    val taskStatus: String,
 )
