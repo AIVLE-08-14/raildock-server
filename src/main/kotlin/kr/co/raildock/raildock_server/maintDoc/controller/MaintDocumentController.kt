@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 
 @Tag(
-    name = "Document",
+    name = "Document-previous",
     description = "유지보수 문서 관리"
 )
 @RestController
