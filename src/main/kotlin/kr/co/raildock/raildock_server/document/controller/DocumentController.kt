@@ -70,17 +70,6 @@ class DocumentController(
         return ResponseEntity.ok().build()
     }
 
-    @PatchMapping("/{documentId}/revisions/{revisionId}")
-    @Operation(summary = "유지보수 개정 문서 log 수정 / 애매한기능 논의필요")
-    fun updateRevision(
-        @PathVariable documentId: UUID,
-        @PathVariable revisionId: UUID,
-        @RequestBody request: DocumentRevisionUpdateRequest
-    ): ResponseEntity<Void> {
-        documentService.updateRevision(documentId, revisionId, request)
-        return ResponseEntity.ok().build()
-    }
-
     @DeleteMapping("/{documentId}/revisions/{revisionId}")
     @Operation(summary = "개정 이력 삭제")
     fun deleteRevision(

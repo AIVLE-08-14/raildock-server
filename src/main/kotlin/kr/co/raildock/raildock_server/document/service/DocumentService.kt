@@ -53,7 +53,6 @@ class DocumentService(
         fun toDto(it: DocumentRevision) = DocumentRevisionDto(
             revisionId = it.id!!,
             version = it.revisionVersion,
-            changeLog = it.changeLog,
             createdAt = it.createdAt,
             createdBy = it.createdBy,
             downloadUrl = fileService.getdownloadURL(it.fileId).body!!
@@ -163,22 +162,6 @@ class DocumentService(
         // document 갱신
         document.latestVersion = revision.revisionVersion
         document.createdAt = revision.createdAt
-    }
-
-    /* =========================
-       개정 로그 수정
-    ========================= */
-    @Transactional
-    fun updateRevision(
-        documentId: UUID,
-        revisionId: UUID,
-        request: DocumentRevisionUpdateRequest
-    ) {
-        val revision = revisionRepository
-            .findByIdAndDocumentId(revisionId, documentId)
-            ?: throw BusinessException(DocumentErrorCode.REVISION_NOT_FOUND)
-
-        revision.changeLog = request.changeLog
     }
 
     /* =========================
