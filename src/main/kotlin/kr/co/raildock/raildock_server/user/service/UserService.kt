@@ -134,4 +134,18 @@ class UserService (
         // 3️⃣ 새 비밀번호 암호화 후 저장
         user.passwordHash = passwordEncoder.encode(req.newPassword)
     }
+
+    @Transactional(readOnly = true)
+    fun getMyId(): Long {
+        val authentication = SecurityContextHolder.getContext().authentication
+            ?: throw BusinessException(UserErrorCode.UNAUTHORIZED)
+
+        val principal = authentication.principal
+
+        if (principal is UserPrincipal) {
+            return principal.userId
+        }
+
+        throw BusinessException(UserErrorCode.UNAUTHORIZED)
+    }
 }

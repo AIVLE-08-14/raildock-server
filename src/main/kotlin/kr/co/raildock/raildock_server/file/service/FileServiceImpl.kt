@@ -16,6 +16,7 @@ import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
+import java.io.InputStream
 import java.time.LocalDate
 import java.util.UUID.randomUUID
 
@@ -148,5 +149,18 @@ class FileServiceImpl(
         val date = LocalDate.now()
         val uuid = randomUUID()
         return "${fileType.name.lowercase()}/$date/$uuid.$ext"
+    }
+
+    override fun openStream(fileId: Long): InputStream {
+        val file = fileRepository.findByIdAndStatus(fileId)
+            ?: throw IllegalArgumentException("파일이 존재하지 않습니다.")
+
+        val getReq = GetObjectRequest.builder()
+            .bucket(file.bucket)
+            .key(file.s3Key)
+            .build()
+
+        // 🔥 ResponseInputStream<GetObjectResponse>
+        return s3Client.getObject(getReq)
     }
 }
