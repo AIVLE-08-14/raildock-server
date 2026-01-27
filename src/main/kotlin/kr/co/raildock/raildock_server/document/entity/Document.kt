@@ -23,5 +23,8 @@ class Document(
     var description: String,
 
     @Column(nullable = false)
-    var createdAt: LocalDateTime = LocalDateTime.now()
+    var createdAt: LocalDateTime = LocalDateTime.now(),
+
+    @Column(nullable = false)
+    var latestVersion: Int = 0
 )

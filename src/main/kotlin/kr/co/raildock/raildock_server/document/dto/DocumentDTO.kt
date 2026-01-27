@@ -7,7 +7,7 @@ data class DocumentSummaryDto(
     val id: UUID,
     val name: String,
     val latestVersion: Int,
-    val updatedAt: LocalDateTime
+    val createdAt: LocalDateTime
 )
 
 data class DocumentDetailDto(

@@ -13,6 +13,7 @@ import kr.co.raildock.raildock_server.user.service.UserService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -29,14 +30,11 @@ class DocumentService(
     @Transactional(readOnly = true)
     fun getDocuments(): List<DocumentSummaryDto> {
         return documentRepository.findAll().map { doc ->
-            val latestRevision =
-                revisionRepository.findTopByDocumentIdOrderByRevisionVersionDesc(doc.id!!)
-
             DocumentSummaryDto(
-                id = doc.id,
+                id = doc.id!!,
                 name = doc.name,
-                latestVersion = latestRevision?.revisionVersion ?: 0,
-                updatedAt = latestRevision?.createdAt ?: doc.createdAt
+                latestVersion = doc.latestVersion,
+                createdAt = doc.createdAt
             )
         }
     }
@@ -86,7 +84,9 @@ class DocumentService(
         val document = documentRepository.save(
             Document(
                 name = request.name,
-                description = request.description
+                description = request.description,
+                createdAt = LocalDateTime.now(),
+                latestVersion = 0
             )
         )
         return document.id!!
@@ -113,6 +113,8 @@ class DocumentService(
         request.description?.let {
             document.description = it
         }
+
+        document.createdAt = LocalDateTime.now()
     }
 
     /* =========================
@@ -153,7 +155,7 @@ class DocumentService(
             (revisionRepository.findTopByDocumentIdOrderByRevisionVersionDesc(documentId)
                 ?.revisionVersion ?: 0) + 1
 
-        revisionRepository.save(
+        val revision = revisionRepository.save(
             DocumentRevision(
                 document = document,
                 revisionVersion = nextVersion,
@@ -161,6 +163,10 @@ class DocumentService(
                 fileId = uploadResponse.fileId
             )
         )
+
+        // document 갱신
+        document.latestVersion = revision.revisionVersion
+        document.createdAt = revision.createdAt
     }
 
     /* =========================
@@ -187,6 +193,9 @@ class DocumentService(
         documentId: UUID,
         revisionId: UUID
     ) {
+        val document = documentRepository.findById(documentId)
+            .orElseThrow { BusinessException(DocumentErrorCode.DOCUMENT_NOT_FOUND) }
+
         val latestRevision =
             revisionRepository.findTopByDocumentIdOrderByRevisionVersionDesc(documentId)
                 ?: throw BusinessException(DocumentErrorCode.DOCUMENT_HAS_NO_REVISION)
@@ -197,5 +206,16 @@ class DocumentService(
 
         revisionRepository.delete(latestRevision)
         fileService.deleteFile(latestRevision.fileId)
+
+        val newLatest =
+            revisionRepository.findTopByDocumentIdOrderByRevisionVersionDesc(documentId)
+
+        if (newLatest != null) {
+            document.latestVersion = newLatest.revisionVersion
+            document.createdAt = newLatest.createdAt
+        } else {
+            document.latestVersion = 0
+            document.createdAt = LocalDateTime.now()
+        }
     }
 }
