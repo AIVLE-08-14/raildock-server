@@ -54,9 +54,12 @@ class SecurityConfig {
     fun corsConfigurationSource(): CorsConfigurationSource {
         val config = CorsConfiguration()
         config.allowCredentials = true
-        config.allowedOrigins = listOf("http://localhost:8080")
-        config.allowedOrigins = listOf("http://localhost:5173")
-        config.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
+        config.allowedOrigins = listOf(
+            "http://localhost:8080",
+            "http://localhost:5173",
+            "http://localhost:8000"
+        )
+        config.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
         config.allowedHeaders = listOf("*")
 
         val source = UrlBasedCorsConfigurationSource()
