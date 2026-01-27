@@ -13,6 +13,8 @@ import kr.co.raildock.raildock_server.detect.dto.ProblemDetectionListResponse
 import kr.co.raildock.raildock_server.detect.dto.VideoTaskDto
 import kr.co.raildock.raildock_server.detect.repository.DetectionVideoRepository
 import kr.co.raildock.raildock_server.detect.repository.ProblemDetectionRepository
+import kr.co.raildock.raildock_server.file.enum.FileType
+import kr.co.raildock.raildock_server.file.service.FileService
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -26,7 +28,8 @@ import java.util.UUID
 @Service
 class DetectService(
     private val detectRepo: ProblemDetectionRepository,
-    private val videoRepo: DetectionVideoRepository
+    private val videoRepo: DetectionVideoRepository,
+    private val fileService: FileService
 ) {
     private val baseVideoDir: Path = Path.of("data/videos")
     private val baseMetaDir: Path = Path.of("data/metadata")
@@ -63,38 +66,27 @@ class DetectService(
         )
 
         if (metadata != null && !metadata.isEmpty) {
-            Files.createDirectories(baseVideoDir)
-            val metaPath = baseMetaDir.resolve("${pd.id}.json")
-            metadata.inputStream.use{input ->
-                Files.copy(input, metaPath, StandardCopyOption.REPLACE_EXISTING)
-            }
-            pd.metadataUrl = metaPath.toString()
+            val metaUrl = fileService.uploadAndGetUrl(metadata, FileType.JSON)
+            pd.metadataUrl = metaUrl
         }
-
-        Files.createDirectories(baseVideoDir)
 
         val createdVideos = mutableListOf<DetectionVideoEntity>()
 
         fun saveOne(type: VideoType, file: MultipartFile){
-            val originalName = file.originalFilename ?: "video.mp4"
-            val ext = originalName.substringAfterLast('.', "mp4")
-            val storedName = "${UUID.randomUUID()}.$ext"
-
-            val dir = baseVideoDir.resolve(pd.id.toString()).resolve(type.name)
-            Files.createDirectories(dir)
-
-            val storedPath = dir.resolve(storedName)
-
-            file.inputStream.use { input ->
-                Files.copy(input, storedPath, StandardCopyOption.REPLACE_EXISTING)
+            val fileType = when(type){
+                VideoType.INSULATOR -> FileType.VIDEO
+                VideoType.RAIL -> FileType.VIDEO
+                VideoType.NEST -> FileType.VIDEO
             }
+
+            val url = fileService.uploadAndGetUrl(file, fileType)
 
             val videoEntity = videoRepo.save(
                 DetectionVideoEntity(
                     problemDetection = pd,
                     videoType = type,
-                    videoURL = storedPath.toString(),
-                    originalFilename = originalName,
+                    videoURL = url,
+                    originalFilename = file.originalFilename ?: "video",
                     taskStatus = DetectJobStatus.PENDING
                 )
             )
