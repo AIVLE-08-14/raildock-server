@@ -25,7 +25,14 @@ class ProblemDetectionEntity(
     var temperature: Int? = null,
     var weather: String? = null,
 
-    @Column(length = 1024)
-    var metadataUrl: String? = null,
+    var metadataFileId: Long? = null,
+    var insulatorVideoFileId: Long? = null,
+    var railVideoFileId: Long? = null,
+    var nestVideoFileId: Long? = null,
+
+    var taskStatus: DetectJobStatus = DetectJobStatus.PENDING,
+    var errorMessage: String? = null,
+
+    var resultZipFileId: Long? = null,
 
 )
