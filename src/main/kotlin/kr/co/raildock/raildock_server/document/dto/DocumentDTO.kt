@@ -7,7 +7,7 @@ data class DocumentSummaryDto(
     val id: UUID,
     val name: String,
     val latestVersion: Int,
-    val updatedAt: LocalDateTime
+    val createdAt: LocalDateTime
 )
 
 data class DocumentDetailDto(
@@ -15,14 +15,12 @@ data class DocumentDetailDto(
     val name: String,
     val description: String,
     val createdAt: LocalDateTime,
-    val latestRevision: DocumentRevisionDto,
     val history: List<DocumentRevisionDto>
 )
 
 data class DocumentRevisionDto(
     val revisionId: UUID,
     val version: Int,
-    val changeLog: String?,
     val createdAt: LocalDateTime,
     val createdBy: Long,
     val downloadUrl: String
@@ -37,8 +35,4 @@ data class DocumentCreateRequest(
 data class DocumentUpdateRequest(
     val name: String?,
     val description: String?
-)
-
-data class DocumentRevisionUpdateRequest(
-    val changeLog: String?
 )

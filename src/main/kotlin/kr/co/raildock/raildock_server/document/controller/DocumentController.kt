@@ -3,7 +3,7 @@ package kr.co.raildock.raildock_server.document.controller
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import kr.co.raildock.raildock_server.document.dto.*
-import kr.co.raildock.raildock_server.document.service.DocumentService
+import kr.co.raildock.raildock_server.document.service.DocumentServiceImpl
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
@@ -16,7 +16,7 @@ import java.util.UUID
 @RestController
 @RequestMapping("/documents")
 class DocumentController(
-    private val documentService: DocumentService
+    private val documentService: DocumentServiceImpl
 ) {
 
     @GetMapping("/list")
@@ -67,17 +67,6 @@ class DocumentController(
         @RequestPart("file") file: MultipartFile
     ): ResponseEntity<Void> {
         documentService.addRevision(documentId, file)
-        return ResponseEntity.ok().build()
-    }
-
-    @PatchMapping("/{documentId}/revisions/{revisionId}")
-    @Operation(summary = "유지보수 개정 문서 log 수정 / 애매한기능 논의필요")
-    fun updateRevision(
-        @PathVariable documentId: UUID,
-        @PathVariable revisionId: UUID,
-        @RequestBody request: DocumentRevisionUpdateRequest
-    ): ResponseEntity<Void> {
-        documentService.updateRevision(documentId, revisionId, request)
         return ResponseEntity.ok().build()
     }
 
