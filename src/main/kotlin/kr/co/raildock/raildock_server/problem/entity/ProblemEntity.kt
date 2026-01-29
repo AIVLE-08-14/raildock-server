@@ -25,7 +25,7 @@ class ProblemEntity(
 
     /** 담당자 ID (미할당 가능) */
     @Column(nullable = true)
-    var managerId: UUID? = null,
+    var managerId: Long? = null,
 
     /** 문제 처리 상태 */
     @Enumerated(EnumType.STRING)

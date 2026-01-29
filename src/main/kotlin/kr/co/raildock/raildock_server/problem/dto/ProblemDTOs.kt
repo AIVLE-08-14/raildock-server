@@ -40,7 +40,7 @@ data class ProblemDetailDto(
 
     val detectedTime: LocalDateTime,
 
-    val managerId: UUID?,
+    val managerId: Long?,
 
     val sourceImageId: UUID,
     val boundingBoxJsonId: UUID
@@ -73,15 +73,6 @@ data class ProblemCreateRequest(
     val boundingBoxJsonId: UUID
 )
 
-
-/**
- * 문제 처리 상태 변경용
- * (워크플로우 제어 목적)
- */
-data class ProblemStatusUpdateRequest(
-    val status: ProblemStatus
-)
-
 /**
  * 문제 내용 수정용
  * (관리자 판단/보정 목적)
@@ -92,7 +83,7 @@ data class ProblemContentUpdateRequest(
     val severityReason: String?,
     val reference: String?,
 
-    val managerId: UUID?,
+    val managerId: Long?,
 
     val problemType: String?,
     val component: String?,
@@ -103,4 +94,11 @@ data class ProblemContentUpdateRequest(
     val weather: String?,
     val temperature: Int?,
     val humidity: Int?
+)
+
+/**
+ * 결함 담당자 변경 요청
+ */
+data class ProblemAssigneeUpdateRequest(
+    val managerId: Long?
 )

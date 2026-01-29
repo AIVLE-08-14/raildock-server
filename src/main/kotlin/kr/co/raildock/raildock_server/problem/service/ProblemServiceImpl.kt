@@ -4,6 +4,7 @@ import kr.co.raildock.raildock_server.problem.dto.*
 import kr.co.raildock.raildock_server.problem.repository.ProblemRepository
 import kr.co.raildock.raildock_server.common.exception.BusinessException
 import kr.co.raildock.raildock_server.problem.entity.ProblemEntity
+import kr.co.raildock.raildock_server.problem.enum.ProblemStatus
 import kr.co.raildock.raildock_server.problem.exception.ProblemErrorCode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -114,14 +115,14 @@ class ProblemServiceImpl(
     @Transactional
     override fun updateProblemStatus(
         problemId: UUID,
-        request: ProblemStatusUpdateRequest
+        status: ProblemStatus
     ) {
         val problem = problemRepository.findById(problemId)
             .orElseThrow {
                 BusinessException(ProblemErrorCode.PROBLEM_NOT_FOUND)
             }
 
-        problem.status = request.status
+        problem.status = status
     }
 
     /* =========================
@@ -153,6 +154,23 @@ class ProblemServiceImpl(
         request.temperature?.let { problem.temperature = it }
         request.humidity?.let { problem.humidity = it }
     }
+
+    /* =========================
+   결함 담당자 변경
+========================= */
+    @Transactional
+    override fun updateProblemAssignee(
+        problemId: UUID,
+        request: ProblemAssigneeUpdateRequest
+    ) {
+        val problem = problemRepository.findById(problemId)
+            .orElseThrow {
+                BusinessException(ProblemErrorCode.PROBLEM_NOT_FOUND)
+            }
+
+        problem.managerId = request.managerId
+    }
+
 
     /* =========================
        결함 삭제

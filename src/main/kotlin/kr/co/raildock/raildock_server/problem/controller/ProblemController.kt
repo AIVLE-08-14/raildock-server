@@ -1,6 +1,7 @@
 package kr.co.raildock.raildock_server.problem.controller
 
 import kr.co.raildock.raildock_server.problem.dto.*
+import kr.co.raildock.raildock_server.problem.enum.ProblemStatus
 import kr.co.raildock.raildock_server.problem.service.ProblemService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -43,9 +44,9 @@ class ProblemController(
     @PatchMapping("/{id}/status")
     fun updateStatus(
         @PathVariable id: UUID,
-        @RequestBody request: ProblemStatusUpdateRequest
+        @RequestParam status: ProblemStatus
     ): ResponseEntity<Void> {
-        problemService.updateProblemStatus(id, request)
+        problemService.updateProblemStatus(id, status)
         return ResponseEntity.noContent().build()
     }
 
@@ -60,6 +61,19 @@ class ProblemController(
         problemService.updateProblemContent(id, request)
         return ResponseEntity.noContent().build()
     }
+
+    /* =========================
+        결함 담당자 변경
+    ========================= */
+    @PatchMapping("/{id}/assignee")
+    fun updateAssignee(
+        @PathVariable id: UUID,
+        @RequestBody request: ProblemAssigneeUpdateRequest
+    ): ResponseEntity<Void> {
+        problemService.updateProblemAssignee(id, request)
+        return ResponseEntity.noContent().build()
+    }
+
 
     /* =========================
        결함 삭제
