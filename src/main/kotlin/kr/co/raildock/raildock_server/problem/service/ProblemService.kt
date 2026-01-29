@@ -28,9 +28,9 @@ interface ProblemService {
     )
 
     /** 담당자 변경 */
-    fun updateProblemAssignee(
+    fun updateProblemManager(
         problemId: UUID,
-        request: ProblemAssigneeUpdateRequest
+        request: ProblemManagerUpdateRequest
     )
 
     /** 문제 삭제 */

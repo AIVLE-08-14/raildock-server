@@ -11,6 +11,8 @@ data class ProblemSummaryDto(
     val severity: Severity,
     val status: ProblemStatus,
     val railType: RailType,
+    val latitude: Double,
+    val longitude: Double,
     val detectedTime: LocalDateTime
 )
 
@@ -99,6 +101,6 @@ data class ProblemContentUpdateRequest(
 /**
  * 결함 담당자 변경 요청
  */
-data class ProblemAssigneeUpdateRequest(
+data class ProblemManagerUpdateRequest(
     val managerId: Long?
 )

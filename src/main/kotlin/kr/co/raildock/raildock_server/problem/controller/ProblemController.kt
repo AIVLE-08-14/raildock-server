@@ -1,5 +1,7 @@
 package kr.co.raildock.raildock_server.problem.controller
 
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import kr.co.raildock.raildock_server.problem.dto.*
 import kr.co.raildock.raildock_server.problem.enum.ProblemStatus
 import kr.co.raildock.raildock_server.problem.service.ProblemService
@@ -7,41 +9,37 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.UUID
 
+@Tag(
+    name = "Problem",
+    description = "문제(결함) 조회 및 관리"
+)
 @RestController
-@RequestMapping("/api/problems")
+@RequestMapping("/problems")
 class ProblemController(
     private val problemService: ProblemService
 ) {
 
-    /* =========================
-       결함 목록 조회
-    ========================= */
     @GetMapping
+    @Operation(summary = "문제(결함) 간단조회")
     fun list(): ResponseEntity<List<ProblemSummaryDto>> =
         ResponseEntity.ok(problemService.getProblems())
-
-    /* =========================
-       결함 상세 조회
-    ========================= */
+    
     @GetMapping("/{id}")
+    @Operation(summary = "문제(결함) 상세조회")
     fun detail(
         @PathVariable id: UUID
     ): ResponseEntity<ProblemDetailDto> =
         ResponseEntity.ok(problemService.getProblemDetail(id))
 
-    /* =========================
-       결함 생성
-    ========================= */
     @PostMapping
+    @Operation(summary = "문제(결함) 임시 생성용")
     fun create(
         @RequestBody request: ProblemCreateRequest
     ): ResponseEntity<UUID> =
         ResponseEntity.ok(problemService.createProblem(request))
 
-    /* =========================
-       결함 상태 변경 (워크플로우)
-    ========================= */
     @PatchMapping("/{id}/status")
+    @Operation(summary = "문제(결함) 상태(status) 변경")
     fun updateStatus(
         @PathVariable id: UUID,
         @RequestParam status: ProblemStatus
@@ -50,10 +48,8 @@ class ProblemController(
         return ResponseEntity.noContent().build()
     }
 
-    /* =========================
-       결함 내용 수정 (관리자 보정)
-    ========================= */
     @PatchMapping("/{id}")
+    @Operation(summary = "문제(결함) 내용 수정")
     fun updateContent(
         @PathVariable id: UUID,
         @RequestBody request: ProblemContentUpdateRequest
@@ -62,23 +58,18 @@ class ProblemController(
         return ResponseEntity.noContent().build()
     }
 
-    /* =========================
-        결함 담당자 변경
-    ========================= */
-    @PatchMapping("/{id}/assignee")
-    fun updateAssignee(
+    @PatchMapping("/{id}/Manager")
+    @Operation(summary = "문제(결함) 담당자(manager) 변경")
+    fun Manager(
         @PathVariable id: UUID,
-        @RequestBody request: ProblemAssigneeUpdateRequest
+        @RequestBody request: ProblemManagerUpdateRequest
     ): ResponseEntity<Void> {
-        problemService.updateProblemAssignee(id, request)
+        problemService.updateProblemManager(id, request)
         return ResponseEntity.noContent().build()
     }
 
-
-    /* =========================
-       결함 삭제
-    ========================= */
     @DeleteMapping("/{id}")
+    @Operation(summary = "문제(결함) 삭제")
     fun delete(
         @PathVariable id: UUID
     ): ResponseEntity<Void> {

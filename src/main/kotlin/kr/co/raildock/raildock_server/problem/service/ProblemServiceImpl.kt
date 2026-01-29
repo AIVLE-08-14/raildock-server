@@ -19,19 +19,8 @@ class ProblemServiceImpl(
        결함 목록 조회 (Summary)
     ========================= */
     @Transactional(readOnly = true)
-    override fun getProblems(): List<ProblemSummaryDto> {
-        return problemRepository.findAll().map { problem ->
-            ProblemSummaryDto(
-                id = problem.id!!,
-                problemNum = problem.problemNum,
-                problemType = problem.problemType,
-                severity = problem.severity,
-                status = problem.status,
-                railType = problem.railType,
-                detectedTime = problem.detectedTime
-            )
-        }
-    }
+    override fun getProblems(): List<ProblemSummaryDto> =
+        problemRepository.findAllSummaries()
 
     /* =========================
        결함 상세 조회 (Detail)
@@ -159,9 +148,9 @@ class ProblemServiceImpl(
    결함 담당자 변경
 ========================= */
     @Transactional
-    override fun updateProblemAssignee(
+    override fun updateProblemManager(
         problemId: UUID,
-        request: ProblemAssigneeUpdateRequest
+        request: ProblemManagerUpdateRequest
     ) {
         val problem = problemRepository.findById(problemId)
             .orElseThrow {
