@@ -15,23 +15,25 @@ class ProblemServiceImpl(
 ) : ProblemService {
 
     /* =========================
-       결함 목록 조회
+       결함 목록 조회 (Summary)
     ========================= */
     @Transactional(readOnly = true)
     override fun getProblems(): List<ProblemSummaryDto> {
-        return problemRepository.findAll().map {
+        return problemRepository.findAll().map { problem ->
             ProblemSummaryDto(
-                id = it.id!!,
-                problemType = it.problemType,
-                severity = it.severity,
-                status = it.status,
-                createdTime = it.createdTime
+                id = problem.id!!,
+                problemNum = problem.problemNum,
+                problemType = problem.problemType,
+                severity = problem.severity,
+                status = problem.status,
+                railType = problem.railType,
+                detectedTime = problem.detectedTime
             )
         }
     }
 
     /* =========================
-       결함 상세 조회
+       결함 상세 조회 (Detail)
     ========================= */
     @Transactional(readOnly = true)
     override fun getProblemDetail(problemId: UUID): ProblemDetailDto {
@@ -42,16 +44,32 @@ class ProblemServiceImpl(
 
         return ProblemDetailDto(
             id = problem.id!!,
-            createdTime = problem.createdTime,
-            problemType = problem.problemType,
-            severity = problem.severity,
+            detectionId = problem.detectionId,
+            problemNum = problem.problemNum,
+
             status = problem.status,
+            severity = problem.severity,
+            severityReason = problem.severityReason,
+            reference = problem.reference,
+
+            problemType = problem.problemType,
+            railType = problem.railType,
+            component = problem.component,
+
             latitude = problem.latitude,
             longitude = problem.longitude,
+            region = problem.region,
+
+            weather = problem.weather,
+            temperature = problem.temperature,
+            humidity = problem.humidity,
+
+            detectedTime = problem.detectedTime,
+
             managerId = problem.managerId,
-            originalImageId = problem.originalImageId,
-            bboxJsonId = problem.bboxJsonId,
-            reportId = problem.reportId
+
+            sourceImageId = problem.sourceImageId,
+            boundingBoxJsonId = problem.boundingBoxJsonId
         )
     }
 
@@ -62,42 +80,78 @@ class ProblemServiceImpl(
     override fun createProblem(request: ProblemCreateRequest): UUID {
         val problem = problemRepository.save(
             ProblemEntity(
+                detectionId = request.detectionId,
+                problemNum = request.problemNum,
+
                 problemType = request.problemType,
+                railType = request.railType,
+                component = request.component,
+
                 severity = request.severity,
+                severityReason = request.severityReason,
+
                 latitude = request.latitude,
                 longitude = request.longitude,
-                originalImageId = request.originalImageId,
-                bboxJsonId = request.bboxJsonId,
-                reportId = request.reportId
+                region = request.region,
+
+                weather = request.weather,
+                temperature = request.temperature,
+                humidity = request.humidity,
+
+                detectedTime = request.detectedTime,
+
+                sourceImageId = request.sourceImageId,
+                boundingBoxJsonId = request.boundingBoxJsonId
             )
         )
+
         return problem.id!!
     }
 
     /* =========================
-       결함 수정 (부분 수정)
+       결함 상태 변경 (워크플로우)
     ========================= */
     @Transactional
-    override fun updateProblem(
+    override fun updateProblemStatus(
         problemId: UUID,
-        request: ProblemUpdateRequest
+        request: ProblemStatusUpdateRequest
     ) {
         val problem = problemRepository.findById(problemId)
             .orElseThrow {
                 BusinessException(ProblemErrorCode.PROBLEM_NOT_FOUND)
             }
 
-        request.severity?.let {
-            problem.severity = it
-        }
+        problem.status = request.status
+    }
 
-        request.status?.let {
-            problem.status = it
-        }
+    /* =========================
+       결함 내용 수정 (관리자 보정)
+    ========================= */
+    @Transactional
+    override fun updateProblemContent(
+        problemId: UUID,
+        request: ProblemContentUpdateRequest
+    ) {
+        val problem = problemRepository.findById(problemId)
+            .orElseThrow {
+                BusinessException(ProblemErrorCode.PROBLEM_NOT_FOUND)
+            }
 
-        request.managerId?.let {
-            problem.managerId = it
-        }
+        request.severity?.let { problem.severity = it }
+        request.severityReason?.let { problem.severityReason = it }
+        request.reference?.let { problem.reference = it }
+
+        request.managerId?.let { problem.managerId = it }
+
+        request.problemType?.let { problem.problemType = it }
+        request.component?.let { problem.component = it }
+
+        request.railType?.let { problem.railType = it }
+        request.region?.let { problem.region = it }
+
+        request.weather?.let { problem.weather = it }
+        request.temperature?.let { problem.temperature = it }
+        request.humidity?.let { problem.humidity = it }
     }
 
     /* =========================

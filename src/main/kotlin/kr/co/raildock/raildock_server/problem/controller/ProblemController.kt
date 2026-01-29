@@ -12,29 +12,62 @@ class ProblemController(
     private val problemService: ProblemService
 ) {
 
+    /* =========================
+       결함 목록 조회
+    ========================= */
     @GetMapping
     fun list(): ResponseEntity<List<ProblemSummaryDto>> =
         ResponseEntity.ok(problemService.getProblems())
 
+    /* =========================
+       결함 상세 조회
+    ========================= */
     @GetMapping("/{id}")
-    fun detail(@PathVariable id: UUID): ResponseEntity<ProblemDetailDto> =
+    fun detail(
+        @PathVariable id: UUID
+    ): ResponseEntity<ProblemDetailDto> =
         ResponseEntity.ok(problemService.getProblemDetail(id))
 
+    /* =========================
+       결함 생성
+    ========================= */
     @PostMapping
-    fun create(@RequestBody request: ProblemCreateRequest): ResponseEntity<UUID> =
+    fun create(
+        @RequestBody request: ProblemCreateRequest
+    ): ResponseEntity<UUID> =
         ResponseEntity.ok(problemService.createProblem(request))
 
-    @PatchMapping("/{id}")
-    fun update(
+    /* =========================
+       결함 상태 변경 (워크플로우)
+    ========================= */
+    @PatchMapping("/{id}/status")
+    fun updateStatus(
         @PathVariable id: UUID,
-        @RequestBody request: ProblemUpdateRequest
+        @RequestBody request: ProblemStatusUpdateRequest
     ): ResponseEntity<Void> {
-        problemService.updateProblem(id, request)
+        problemService.updateProblemStatus(id, request)
         return ResponseEntity.noContent().build()
     }
 
+    /* =========================
+       결함 내용 수정 (관리자 보정)
+    ========================= */
+    @PatchMapping("/{id}")
+    fun updateContent(
+        @PathVariable id: UUID,
+        @RequestBody request: ProblemContentUpdateRequest
+    ): ResponseEntity<Void> {
+        problemService.updateProblemContent(id, request)
+        return ResponseEntity.noContent().build()
+    }
+
+    /* =========================
+       결함 삭제
+    ========================= */
     @DeleteMapping("/{id}")
-    fun delete(@PathVariable id: UUID): ResponseEntity<Void> {
+    fun delete(
+        @PathVariable id: UUID
+    ): ResponseEntity<Void> {
         problemService.deleteProblem(id)
         return ResponseEntity.noContent().build()
     }
