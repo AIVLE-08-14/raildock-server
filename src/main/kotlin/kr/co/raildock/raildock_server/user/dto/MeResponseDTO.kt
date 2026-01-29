@@ -6,8 +6,8 @@ import kr.co.raildock.raildock_server.user.entity.User
 data class MeResponseDTO(
     val id: Long,
     val employeeId: String,
-    val email: String?,
-    val phoneNumber: String?,
+    val email: String,
+    val phoneNumber: String,
     val name: String,
     val role: Role
 ) {
