@@ -13,7 +13,7 @@ class DetectScheduler(
         var ran = true
         var count = 0
         while(ran && count < 3){
-            ran = detectWorker.processOnePending()
+            ran = detectWorker.runOnce()
             count++
         }
     }

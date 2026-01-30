@@ -32,9 +32,11 @@ class LlmWorker(
     }
 
     override fun execute(pd: ProblemDetectionEntity) {
+        // 1. LLM 처리에 필요한 입력 파일 준비
         val resultZipFileId = pd.videoDetectedZipFileId
         val metadataFileId = pd.metadataFileId
 
+        // 혹시 모를 예외처리(로직상 발생하지 않아야 함)
         if (resultZipFileId == null || metadataFileId == null) {
             pd.llmTaskStatus = TaskStatus.FAILED
             pd.taskErrorMessage = "LLM input not ready: resultZipFileId or metadataFileId is null"
@@ -44,6 +46,7 @@ class LlmWorker(
         val videoUrl = fileService.getDownloadUrl(resultZipFileId)
         val metadataUrl = fileService.getDownloadUrl(metadataFileId)
 
+        // 2. FastAPI(LLM) 요청
         val response = llmClient.pipeline.processVideo(
             videoUrl = videoUrl,
             originalMetadataUrl = metadataUrl,
@@ -51,6 +54,7 @@ class LlmWorker(
             skipReview = false
         )
 
+        // 3. 결과 처리
         /**
          * 여기서는 일단 "LLM 처리 성공"까지만 책임진다.
          * - response.pdfPaths
@@ -62,6 +66,7 @@ class LlmWorker(
         // pd.llmResultSummary = response.summary
         // pd.llmPdfPaths = response.pdfPaths
 
+        // 4. 상태 갱신
         pd.llmTaskStatus = TaskStatus.COMPLETED
         pd.taskErrorMessage = null
     }
