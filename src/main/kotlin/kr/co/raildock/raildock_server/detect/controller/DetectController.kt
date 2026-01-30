@@ -33,26 +33,8 @@ class DetectController(
         @Parameter(description = "파일이름/요청명", required = true)
         @RequestParam("name") name: String,
 
-        @Parameter(description = "촬영 위치 및 구간", required = true)
-        @RequestParam("section") section: String,
-
-        @Parameter(description = "촬영 시각(ISO-8601)", required = true)
-        @RequestParam("datetime") datetime: String,
-
-        @Parameter(description = "방향", required = true)
-        @RequestParam("direction") direction: String,
-
-        @Parameter(description = "습도", required = false)
-        @RequestParam("humidity", required = false) humidity: Int?,
-
-        @Parameter(description = "온도", required = false)
-        @RequestParam("temperature", required = false) temperature: Int?,
-
-        @Parameter(description = "날씨", required = false)
-        @RequestParam("weather", required = false) weather: String?,
-
-        @Parameter(description = "메타데이터(임시저장용)", required = false)
-        @RequestParam("metadata", required = false) metadata: MultipartFile?,
+        @Parameter(description = "메타데이터", required = true)
+        @RequestParam("metadata", required = true) metadata: MultipartFile,
 
         // ---Video Files ---
         @Parameter(description = "애자 영상 파일", required = false)
@@ -66,12 +48,6 @@ class DetectController(
     ): ResponseEntity<DetectCreateResponse> {
         val res = service.create(
             name = name,
-            section = section,
-            datetime = datetime,
-            direction = direction,
-            humidity = humidity,
-            temperature = temperature,
-            weather = weather,
             metadata = metadata,
             insulatorVideo = insulatorVideo,
             railVideo = railVideo,
