@@ -12,6 +12,16 @@ import java.time.LocalDate
 class ProblemAnalysisController(
     private val problemAnalysisService: ProblemAnalysisService
 ) {
+    /* =========================
+       시스템 결함 상태 요약
+       - UNASSIGNED
+       - ASSIGNED
+    ========================= */
+    @GetMapping("/status")
+    fun statusSummary() =
+        ResponseEntity.ok(
+            problemAnalysisService.statusSummary()
+        )
 
     /* =========================
        결함 타입별 집계

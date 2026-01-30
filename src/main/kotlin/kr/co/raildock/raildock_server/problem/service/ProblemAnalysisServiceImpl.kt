@@ -1,6 +1,7 @@
 package kr.co.raildock.raildock_server.problem.analysis.service
 
 import kr.co.raildock.raildock_server.problem.dto.ProblemSummaryDto
+import kr.co.raildock.raildock_server.problem.dto.SystemProblemStatusSummaryDto
 import kr.co.raildock.raildock_server.problem.enum.*
 import kr.co.raildock.raildock_server.problem.entity.ProblemEntity
 import kr.co.raildock.raildock_server.problem.repository.ProblemRepository
@@ -15,6 +16,22 @@ import java.time.format.DateTimeFormatter
 class ProblemAnalysisServiceImpl(
     private val problemRepository: ProblemRepository
 ) : ProblemAnalysisService {
+
+    override fun statusSummary(): SystemProblemStatusSummaryDto {
+
+        val unassigned = problemRepository.countByStatus(
+            ProblemStatus.UNASSIGNED
+        )
+
+        val assigned = problemRepository.countByStatus(
+            ProblemStatus.ASSIGNED
+        )
+
+        return SystemProblemStatusSummaryDto(
+            unassignedCount = unassigned,
+            assignedCount = assigned
+        )
+    }
 
     /* =========================
        공통 데이터 로딩

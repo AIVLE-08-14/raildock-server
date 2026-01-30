@@ -4,6 +4,7 @@ import kr.co.raildock.raildock_server.problem.entity.ProblemEntity
 import org.springframework.data.jpa.repository.JpaRepository
 import java.util.UUID
 import kr.co.raildock.raildock_server.problem.dto.ProblemSummaryDto
+import kr.co.raildock.raildock_server.problem.enum.ProblemStatus
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import java.time.LocalDate
@@ -36,5 +37,7 @@ interface ProblemRepository : JpaRepository<ProblemEntity, UUID> {
         from: LocalDateTime,
         to: LocalDateTime
     ): List<ProblemEntity>
+
+    fun countByStatus(status: ProblemStatus): Long
 
 }

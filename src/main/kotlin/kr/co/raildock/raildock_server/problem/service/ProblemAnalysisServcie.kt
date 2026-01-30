@@ -1,11 +1,14 @@
 package kr.co.raildock.raildock_server.problem.service
 
 import kr.co.raildock.raildock_server.problem.dto.ProblemSummaryDto
+import kr.co.raildock.raildock_server.problem.dto.SystemProblemStatusSummaryDto
 import kr.co.raildock.raildock_server.problem.enum.*
 import java.time.LocalDate
 
 interface ProblemAnalysisService {
 
+    // 결함 요약
+    fun statusSummary(): SystemProblemStatusSummaryDto
     /* =========================
        결함 타입별 집계
     ========================= */
