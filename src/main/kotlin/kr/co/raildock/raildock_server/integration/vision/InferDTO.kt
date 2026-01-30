@@ -1,6 +1,6 @@
-package kr.co.raildock.raildock_server.detect.dto
+package kr.co.raildock.raildock_server.integration.vision
 
-data class FastAPIInferRequest(
+data class VisionInferRequest(
     val rail_mp4: String? = null,
     val insulator_mp4: String? = null,
     val nest_mp4: String? = null,
@@ -9,6 +9,6 @@ data class FastAPIInferRequest(
     val stride: Int? = 5
 )
 
-data class InferHealthResponse(
+data class VisionHealthResponse(
     val ok: Boolean,
 )

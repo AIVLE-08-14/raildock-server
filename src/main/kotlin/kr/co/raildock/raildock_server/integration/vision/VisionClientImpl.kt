@@ -1,7 +1,5 @@
-package kr.co.raildock.raildock_server.detect.service
+package kr.co.raildock.raildock_server.integration.vision
 
-import kr.co.raildock.raildock_server.detect.dto.FastAPIInferRequest
-import kr.co.raildock.raildock_server.detect.dto.InferHealthResponse
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
@@ -11,9 +9,9 @@ import reactor.core.publisher.Mono
 import java.time.Duration
 
 @Component
-class FastApiClientImpl(
-    @Value("\${fastapi.url}") private val fastApiUrl: String
-) : FastApiClient {
+class VisionClientImpl(
+    @Value("\${integration.vision.url}") private val fastApiUrl: String
+) : VisionClient {
 
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -24,7 +22,7 @@ class FastApiClientImpl(
         }
         .build()
 
-    override fun infer(req: FastAPIInferRequest): ByteArray {
+    override fun infer(req: VisionInferRequest): ByteArray {
         log.info("FastAPI infer request={}", req)
 
         return client.post()
@@ -58,14 +56,14 @@ class FastApiClientImpl(
             .block() ?: throw IllegalStateException("FastAPI returned empty body")
     }
 
-    override fun inferHealthCheck(): InferHealthResponse {
+    override fun inferHealthCheck(): VisionHealthResponse {
         log.info("FastAPI infer health check")
 
         return client.get()
             .uri("/health")
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
-            .bodyToMono(InferHealthResponse::class.java)
+            .bodyToMono(VisionHealthResponse::class.java)
             .timeout(Duration.ofSeconds(10))
             .block() ?: throw IllegalStateException("FastAPI /health returned empty body")
     }

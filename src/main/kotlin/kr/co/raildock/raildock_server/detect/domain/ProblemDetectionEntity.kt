@@ -26,7 +26,7 @@ class ProblemDetectionEntity(
     var nestVideoFileId: Long? = null,
 
     var videoTaskStatus: TaskStatus = TaskStatus.PENDING,
-    var llmTaskStatus: TaskStatus = TaskStatus.PENDING,
+    var llmTaskStatus: TaskStatus = TaskStatus.CREATED,
     var taskErrorMessage: String? = null,
 
     var videoDetectedZipFileId: Long? = null,

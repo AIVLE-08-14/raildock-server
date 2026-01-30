@@ -2,10 +2,11 @@ package kr.co.raildock.raildock_server.detect.service
 
 import kr.co.raildock.raildock_server.detect.domain.ProblemDetectionEntity
 import kr.co.raildock.raildock_server.detect.domain.TaskStatus
-import kr.co.raildock.raildock_server.detect.dto.FastAPIInferRequest
+import kr.co.raildock.raildock_server.integration.vision.VisionInferRequest
 import kr.co.raildock.raildock_server.detect.repository.ProblemDetectionRepository
 import kr.co.raildock.raildock_server.file.enum.FileType
 import kr.co.raildock.raildock_server.file.service.FileService
+import kr.co.raildock.raildock_server.integration.vision.VisionClientImpl
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
@@ -13,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional
 class DetectWorker(
     detectRepo: ProblemDetectionRepository,
     private val fileService: FileService,
-    private val fastApiClient: FastApiClientImpl,
+    private val fastApiClient: VisionClientImpl,
 ) : AbstractTaskWorker(detectRepo) {
 
     @Transactional
@@ -45,7 +46,7 @@ class DetectWorker(
         }
 
         // 2) FastAPI(VideoDetection) 요청
-        val req = FastAPIInferRequest(
+        val req = VisionInferRequest(
             rail_mp4 = railUrl,
             insulator_mp4 = insulatorUrl,
             nest_mp4 = nestUrl,
@@ -69,7 +70,7 @@ class DetectWorker(
         pd.videoTaskStatus = TaskStatus.COMPLETED
         pd.taskErrorMessage = null
 
-        // 5) LLM 트리거: 입력이 준비됐으면 CREATED(or WAITING) -> PENDING
+        // 5) LLM 트리거: 입력이 준비됐으면 CREATED -> PENDING
         val llmReady = (pd.videoDetectedZipFileId != null && pd.metadataFileId != null)
         if (llmReady && pd.llmTaskStatus == TaskStatus.CREATED) {
             pd.llmTaskStatus = TaskStatus.PENDING

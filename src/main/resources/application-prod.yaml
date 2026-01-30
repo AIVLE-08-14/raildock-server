@@ -17,5 +17,6 @@ springdoc:
   swagger-ui:
     enabled: true   # 운영에서 끌 거면 false로
 
-fastapi:
-  url: http://hsyoon14.iptime.org:18000
+integration:
+  vision:
+    url: http://hsyoon14.iptime.org:18000

@@ -34,8 +34,12 @@ logging:
   level:
     org.springframework.security: DEBUG
 
-fastapi:
-  url: http://hsyoon14.iptime.org:18000
+integration:
+  llm:
+    url: http://localhost:8000
+  vision:
+    url: http://hsyoon14.iptime.org:18000
+
 aws:
   region: ap-northeast-2
   s3:
