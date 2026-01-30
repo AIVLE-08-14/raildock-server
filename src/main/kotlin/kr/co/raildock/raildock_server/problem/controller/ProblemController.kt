@@ -20,7 +20,7 @@ class ProblemController(
 ) {
 
     @GetMapping
-    @Operation(summary = "문제(결함) 간단조회")
+    @Operation(summary = "문제(결함) 전체 간단조회")
     fun list(): ResponseEntity<List<ProblemSummaryDto>> =
         ResponseEntity.ok(problemService.getProblems())
     
@@ -58,9 +58,9 @@ class ProblemController(
         return ResponseEntity.noContent().build()
     }
 
-    @PatchMapping("/{id}/Manager")
+    @PatchMapping("/{id}/manager")
     @Operation(summary = "문제(결함) 담당자(manager) 변경")
-    fun Manager(
+    fun manager(
         @PathVariable id: UUID,
         @RequestBody request: ProblemManagerUpdateRequest
     ): ResponseEntity<Void> {

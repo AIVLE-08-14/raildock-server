@@ -4,7 +4,11 @@ import kr.co.raildock.raildock_server.problem.entity.ProblemEntity
 import org.springframework.data.jpa.repository.JpaRepository
 import java.util.UUID
 import kr.co.raildock.raildock_server.problem.dto.ProblemSummaryDto
+import kr.co.raildock.raildock_server.problem.enum.ProblemStatus
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 interface ProblemRepository : JpaRepository<ProblemEntity, UUID> {
 
@@ -28,4 +32,19 @@ interface ProblemRepository : JpaRepository<ProblemEntity, UUID> {
         from ProblemEntity p
     """)
     fun findAllSummaries(): List<ProblemSummaryDto>
+
+    fun findByDetectedTimeBetween(
+        from: LocalDateTime,
+        to: LocalDateTime
+    ): List<ProblemEntity>
+
+    fun countByStatus(status: ProblemStatus): Long
+
+    fun findTop10ByStatusInOrderByDetectedTimeDesc(
+        statuses: Collection<ProblemStatus>
+    ): List<ProblemEntity>
+
+    fun findByStatusIn(
+        statuses: List<ProblemStatus>
+    ): List<ProblemEntity>
 }
