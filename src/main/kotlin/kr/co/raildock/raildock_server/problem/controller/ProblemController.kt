@@ -58,9 +58,9 @@ class ProblemController(
         return ResponseEntity.noContent().build()
     }
 
-    @PatchMapping("/{id}/Manager")
+    @PatchMapping("/{id}/manager")
     @Operation(summary = "문제(결함) 담당자(manager) 변경")
-    fun Manager(
+    fun manager(
         @PathVariable id: UUID,
         @RequestBody request: ProblemManagerUpdateRequest
     ): ResponseEntity<Void> {
