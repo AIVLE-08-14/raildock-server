@@ -5,9 +5,12 @@ import kr.co.raildock.raildock_server.problem.dto.SystemProblemStatusSummaryDto
 import kr.co.raildock.raildock_server.problem.enum.*
 
 interface ProblemDashboardService {
+    // GIS용 전체문제 가져오기
+    fun gisProblems(): List<ProblemSummaryDto>
 
     // 결함 요약
     fun statusSummary(): SystemProblemStatusSummaryDto
+
     // 최근 결함
     fun recentActiveProblems(): List<ProblemSummaryDto>
 

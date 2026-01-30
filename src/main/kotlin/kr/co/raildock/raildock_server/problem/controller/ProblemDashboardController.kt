@@ -17,6 +17,10 @@ import org.springframework.web.bind.annotation.*
 class ProblemDashboardController(
     private val problemDashboardService: ProblemDashboardService
 ) {
+    @GetMapping("/GIS")
+    @Operation(summary = "GIS용 문제(결함) 전체 간단조회")
+    fun list(): ResponseEntity<List<ProblemSummaryDto>> =
+        ResponseEntity.ok(problemDashboardService.gisProblems())
 
     @GetMapping("/status")
     @Operation(summary = "시스템 결함상태 요약 (UNASSIGNED/ASSIGNED)")

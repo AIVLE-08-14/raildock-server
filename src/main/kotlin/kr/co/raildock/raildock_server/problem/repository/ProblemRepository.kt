@@ -43,4 +43,8 @@ interface ProblemRepository : JpaRepository<ProblemEntity, UUID> {
     fun findTop10ByStatusInOrderByDetectedTimeDesc(
         statuses: Collection<ProblemStatus>
     ): List<ProblemEntity>
+
+    fun findByStatusIn(
+        statuses: List<ProblemStatus>
+    ): List<ProblemEntity>
 }

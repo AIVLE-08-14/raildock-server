@@ -20,7 +20,7 @@ class ProblemController(
 ) {
 
     @GetMapping
-    @Operation(summary = "문제(결함) 간단조회")
+    @Operation(summary = "문제(결함) 전체 간단조회")
     fun list(): ResponseEntity<List<ProblemSummaryDto>> =
         ResponseEntity.ok(problemService.getProblems())
     

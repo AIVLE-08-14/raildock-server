@@ -16,6 +16,30 @@ class ProblemDashboardServiceImpl(
     private val problemRepository: ProblemRepository
 ) : ProblemDashboardService {
 
+    override fun gisProblems(): List<ProblemSummaryDto> {
+
+        val activeStatuses = listOf(
+            ProblemStatus.UNASSIGNED,
+            ProblemStatus.ASSIGNED
+        )
+
+        return problemRepository
+            .findByStatusIn(activeStatuses)
+            .map { entity ->
+                ProblemSummaryDto(
+                    id = entity.id!!,
+                    problemNum = entity.problemNum,
+                    problemType = entity.problemType,
+                    severity = entity.severity,
+                    status = entity.status,
+                    railType = entity.railType,
+                    latitude = entity.latitude,
+                    longitude = entity.longitude,
+                    detectedTime = entity.detectedTime
+                )
+            }
+    }
+
     override fun statusSummary(): SystemProblemStatusSummaryDto {
 
         val unassigned = problemRepository.countByStatus(
