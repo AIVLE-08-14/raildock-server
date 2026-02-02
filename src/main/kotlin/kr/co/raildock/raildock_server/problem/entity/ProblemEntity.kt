@@ -48,6 +48,10 @@ class ProblemEntity(
     @Column(nullable = false, length = 100)
     var problemType: String,
 
+    /** 권장 조치내용 **/
+    @Column(nullable = false)
+    var recommendedActions : String,
+
     /** 위험 등급 */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

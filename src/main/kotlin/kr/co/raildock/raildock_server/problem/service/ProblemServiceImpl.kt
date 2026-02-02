@@ -41,6 +41,7 @@ class ProblemServiceImpl(
             severity = problem.severity,
             severityReason = problem.severityReason,
             reference = problem.reference,
+            recommendedActions = problem.recommendedActions,
 
             problemType = problem.problemType,
             railType = problem.railType,
@@ -79,6 +80,7 @@ class ProblemServiceImpl(
 
                 severity = request.severity,
                 severityReason = request.severityReason,
+                recommendedActions = request.recommendedActions,
 
                 latitude = request.latitude,
                 longitude = request.longitude,

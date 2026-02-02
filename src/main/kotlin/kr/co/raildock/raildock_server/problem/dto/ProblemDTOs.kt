@@ -27,6 +27,7 @@ data class ProblemDetailDto(
     val severity: Severity,
     val severityReason: String?,
     val reference: String?,
+    val recommendedActions : String?,
 
     val problemType: String,
     val railType: RailType,
@@ -60,6 +61,7 @@ data class ProblemCreateRequest(
 
     val severity: Severity,
     val severityReason: String?,
+    val recommendedActions : String,
 
     val latitude: Double,
     val longitude: Double,
