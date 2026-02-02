@@ -27,8 +27,10 @@ data class ProblemDetailDto(
     val severity: Severity,
     val severityReason: String?,
     val reference: String?,
+    val recommendedActions : String?,
 
     val problemType: String,
+    val problemStatus: String,
     val railType: RailType,
     val component: String,
 
@@ -44,8 +46,8 @@ data class ProblemDetailDto(
 
     val managerId: Long?,
 
-    val sourceImageId: UUID,
-    val boundingBoxJsonId: UUID
+    val sourceImageIdURL: String?,
+    val boundingBoxJsonIdURL: String?
 )
 
 
@@ -55,11 +57,14 @@ data class ProblemCreateRequest(
     val problemNum: String,
 
     val problemType: String,
+    val problemStatus: String,
     val railType: RailType,
     val component: String,
+    val reference: String?,
 
     val severity: Severity,
     val severityReason: String?,
+    val recommendedActions : String,
 
     val latitude: Double,
     val longitude: Double,
@@ -71,8 +76,8 @@ data class ProblemCreateRequest(
 
     val detectedTime: LocalDateTime,
 
-    val sourceImageId: UUID,
-    val boundingBoxJsonId: UUID
+    val sourceImageId: Long,
+    val boundingBoxJsonId: Long
 )
 
 /**
@@ -80,14 +85,15 @@ data class ProblemCreateRequest(
  * (관리자 판단/보정 목적)
  */
 data class ProblemContentUpdateRequest(
-
     val severity: Severity?,
     val severityReason: String?,
     val reference: String?,
+    val recommendedActions: String?,
 
     val managerId: Long?,
 
     val problemType: String?,
+    val problemStatus: String,
     val component: String?,
 
     val railType: RailType?,

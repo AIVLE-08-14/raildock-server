@@ -48,17 +48,25 @@ class ProblemEntity(
     @Column(nullable = false, length = 100)
     var problemType: String,
 
+    /** problemStatus 결함상태 */
+    @Column(nullable = true, columnDefinition = "MEDIUMTEXT")
+    var problemStatus : String,
+
+    /** 권장 조치내용 **/
+    @Column(nullable = true, columnDefinition = "MEDIUMTEXT")
+    var recommendedActions : String,
+
     /** 위험 등급 */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     var severity: Severity,
 
     /** 위험 등급 판정 근거 */
-    @Column(nullable = true,)
+    @Column(nullable = true, columnDefinition = "MEDIUMTEXT")
     var severityReason: String? = null,
 
     /** 참고 규정 / 기준 */
-    @Column(nullable = true)
+    @Column(nullable = true, columnDefinition = "MEDIUMTEXT")
     var reference: String? = null,
 
     /** 철도 분류 (데이터셋 기준) */
@@ -88,9 +96,9 @@ class ProblemEntity(
 
     /** 원본 이미지 ID */
     @Column(nullable = true)
-    var sourceImageId: UUID,
+    var sourceImageId: Long,
 
     /** Bounding Box JSON ID */
     @Column(nullable = true)
-    var boundingBoxJsonId: UUID
+    var boundingBoxJsonId: Long
 )
