@@ -3,16 +3,19 @@ package kr.co.raildock.raildock_server.problem.service
 import kr.co.raildock.raildock_server.problem.dto.*
 import kr.co.raildock.raildock_server.problem.repository.ProblemRepository
 import kr.co.raildock.raildock_server.common.exception.BusinessException
+import kr.co.raildock.raildock_server.file.service.FileService
 import kr.co.raildock.raildock_server.problem.entity.ProblemEntity
 import kr.co.raildock.raildock_server.problem.enum.ProblemStatus
 import kr.co.raildock.raildock_server.problem.exception.ProblemErrorCode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
+import kotlin.String
 
 @Service
 class ProblemServiceImpl(
-    private val problemRepository: ProblemRepository
+    private val problemRepository: ProblemRepository,
+    private val FileService: FileService
 ) : ProblemService {
 
     /* =========================
@@ -44,6 +47,7 @@ class ProblemServiceImpl(
             recommendedActions = problem.recommendedActions,
 
             problemType = problem.problemType,
+            problemStatus = problem.problemStatus,
             railType = problem.railType,
             component = problem.component,
 
@@ -59,8 +63,8 @@ class ProblemServiceImpl(
 
             managerId = problem.managerId,
 
-            sourceImageId = problem.sourceImageId,
-            boundingBoxJsonId = problem.boundingBoxJsonId
+            sourceImageIdURL = FileService.getDownloadUrl(problem.sourceImageId),
+            boundingBoxJsonIdURL = FileService.getDownloadUrl(problem.boundingBoxJsonId),
         )
     }
 
@@ -75,8 +79,10 @@ class ProblemServiceImpl(
                 problemNum = request.problemNum,
 
                 problemType = request.problemType,
+                problemStatus = request.problemStatus,
                 railType = request.railType,
                 component = request.component,
+                reference = request.reference,
 
                 severity = request.severity,
                 severityReason = request.severityReason,
@@ -132,10 +138,12 @@ class ProblemServiceImpl(
         request.severity?.let { problem.severity = it }
         request.severityReason?.let { problem.severityReason = it }
         request.reference?.let { problem.reference = it }
+        request.recommendedActions?.let { problem.recommendedActions = it }
 
         request.managerId?.let { problem.managerId = it }
 
         request.problemType?.let { problem.problemType = it }
+        request.problemStatus?.let { problem.problemStatus = it }
         request.component?.let { problem.component = it }
 
         request.railType?.let { problem.railType = it }
