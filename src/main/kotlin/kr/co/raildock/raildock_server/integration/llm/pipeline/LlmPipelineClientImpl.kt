@@ -1,12 +1,10 @@
 package kr.co.raildock.raildock_server.integration.llm.pipeline
 
 import kr.co.raildock.raildock_server.integration.llm.dto.ProcessVideoRequest
-import kr.co.raildock.raildock_server.integration.llm.dto.ProcessVideoResponse
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
-import reactor.core.publisher.Mono
 import java.time.Duration
 
 @Component

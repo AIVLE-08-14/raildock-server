@@ -8,7 +8,6 @@ import kr.co.raildock.raildock_server.file.enum.FileType
 import kr.co.raildock.raildock_server.file.service.FileService
 import kr.co.raildock.raildock_server.integration.vision.VisionClientImpl
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
 
 @Component
 class DetectWorker(
