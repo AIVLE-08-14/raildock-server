@@ -15,7 +15,7 @@ interface ProblemDetectionRepository: JpaRepository<ProblemDetectionEntity, Long
     fun findTopByVideoTaskStatusOrderByCreatedAtDesc(videoTaskStatus: TaskStatus): ProblemDetectionEntity?
     fun findTopByLlmTaskStatusOrderByCreatedAtDesc(lmTaskStatus: TaskStatus): ProblemDetectionEntity?
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional
     @Query(
         """
@@ -30,7 +30,7 @@ interface ProblemDetectionRepository: JpaRepository<ProblemDetectionEntity, Long
         @Param("to") to: TaskStatus
     ): Int
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional
     @Query(
         """

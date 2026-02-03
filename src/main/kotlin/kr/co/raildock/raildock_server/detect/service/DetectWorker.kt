@@ -15,65 +15,66 @@ class DetectWorker(
     detectRepo: ProblemDetectionRepository,
     private val fileService: FileService,
     private val fastApiClient: VisionClientImpl,
+    private val tx: TaskTxService
 ) : AbstractTaskWorker(detectRepo) {
 
-    @Transactional
     fun runOnce(): Boolean = super.processOnePending()
 
     override fun findCandidate(): ProblemDetectionEntity? {
         return detectRepo.findTopByVideoTaskStatusOrderByCreatedAtDesc(TaskStatus.PENDING)
     }
 
-    override fun tryStart(id: Long): Int {
-        return detectRepo.tryStartVideo(
-            id = id,
-            from = TaskStatus.PENDING,
-            to = TaskStatus.RUNNING
-        )
-    }
+    override fun tryStart(id: Long): Int =
+        if (tx.markVideoRunning(id)) 1 else 0
 
     override fun execute(pd: ProblemDetectionEntity) {
-        // 1) 파일 다운로드 URL 받기
-        val railUrl = pd.railVideoFileId?.let { fileService.getDownloadUrl(it) }
-        val insulatorUrl = pd.insulatorVideoFileId?.let { fileService.getDownloadUrl(it) }
-        val nestUrl = pd.nestVideoFileId?.let { fileService.getDownloadUrl(it) }
 
-        // 최소 조건 체크
-        if (railUrl == null && insulatorUrl == null && nestUrl == null) {
-            pd.videoTaskStatus = TaskStatus.FAILED
-            pd.taskErrorMessage = "No video fileId found. At least one video is required."
-            return
-        }
+        val id = pd.id ?: return
 
-        // 2) FastAPI(VideoDetection) 요청
-        val req = VisionInferRequest(
-            rail_mp4 = railUrl,
-            insulator_mp4 = insulatorUrl,
-            nest_mp4 = nestUrl,
-            conf = 0.25,
-            iou = 0.7,
-            stride = 5
-        )
+        try {
+            // 1. 영상 파일 다운로드 URL 확보
+            val railUrl = pd.railVideoFileId?.let { fileService.getDownloadUrl(it) }
+            val insulatorUrl = pd.insulatorVideoFileId?.let { fileService.getDownloadUrl(it) }
+            val nestUrl = pd.nestVideoFileId?.let { fileService.getDownloadUrl(it) }
 
-        val zipBytes = fastApiClient.infer(req)
+            // 2. URL 입력 확인
+            if (railUrl == null && insulatorUrl == null && nestUrl == null) {
+                tx.failVideo(id, "No input videos found. At least one video is required.")
+                return
 
-        // 3) 결과 ZIP 업로드 + 저장
-        val result = fileService.uploadBytes(
-            bytes = zipBytes,
-            originalFilename = "detection_result_${pd.id}.zip",
-            contentType = "application/zip",
-            fileType = FileType.ZIP
-        )
-        pd.videoDetectedZipFileId = result.fileId
+            }
 
-        // 4) 상태 갱신
-        pd.videoTaskStatus = TaskStatus.COMPLETED
-        pd.taskErrorMessage = null
+            // 3. Vision API 영상 분석 요청
+            val req = VisionInferRequest(
+                rail_mp4 = railUrl,
+                insulator_mp4 = insulatorUrl,
+                nest_mp4 = nestUrl,
+                conf = 0.25,
+                iou = 0.7,
+                stride = 5
+            )
 
-        // 5) LLM 트리거: 입력이 준비됐으면 CREATED -> PENDING
-        val llmReady = (pd.videoDetectedZipFileId != null && pd.metadataFileId != null)
-        if (llmReady && pd.llmTaskStatus == TaskStatus.CREATED) {
-            pd.llmTaskStatus = TaskStatus.PENDING
+            val zipBytes = fastApiClient.infer(req)
+
+            // 4. 결과 ZIP 업로드 + 저장
+            val result = fileService.uploadBytes(
+                bytes = zipBytes,
+                originalFilename = "detection_result_${pd.id}.zip",
+                contentType = "application/zip",
+                fileType = FileType.ZIP
+            )
+
+            // 5. 완료 처리
+            tx.completeVideo(id) { entity ->
+                entity.videoDetectedZipFileId = result.fileId
+
+                val llmReady = (entity.metadataFileId != null)
+                if (llmReady && entity.llmTaskStatus == TaskStatus.CREATED) {
+                    entity.llmTaskStatus = TaskStatus.PENDING
+                }
+            }
+        } catch (e: Exception) {
+            tx.failVideo(id, "${e.message}")
         }
     }
 
