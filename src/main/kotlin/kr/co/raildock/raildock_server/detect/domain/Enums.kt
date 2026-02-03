@@ -1,5 +1,5 @@
 package kr.co.raildock.raildock_server.detect.domain
 
-enum class DetectStatus {
-    PENDING, RUNNING, COMPLETED, FAILED
+enum class TaskStatus {
+    CREATED, PENDING, RUNNING, COMPLETED, FAILED
 }

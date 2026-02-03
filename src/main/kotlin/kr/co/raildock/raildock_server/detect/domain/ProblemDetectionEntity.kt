@@ -1,7 +1,9 @@
 package kr.co.raildock.raildock_server.detect.domain
 
 import jakarta.persistence.*
-import java.time.OffsetDateTime
+import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.annotation.LastModifiedDate
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "problem_detection")
@@ -12,27 +14,29 @@ class ProblemDetectionEntity(
     @Column(nullable = false)
     var name: String,
 
-    @Column(nullable = false)
-    var section: String,
-
-    @Column(nullable = false)
-    var datetime: OffsetDateTime,
-
-    @Column(nullable = false)
-    var direction: String,
-
-    var humidity: Int? = null,
-    var temperature: Int? = null,
-    var weather: String? = null,
+    @CreatedDate
+    var createdAt: LocalDateTime,
+    @LastModifiedDate
+    var updatedAt: LocalDateTime,
 
     var metadataFileId: Long? = null,
+
     var insulatorVideoFileId: Long? = null,
     var railVideoFileId: Long? = null,
     var nestVideoFileId: Long? = null,
 
-    var taskStatus: DetectStatus = DetectStatus.PENDING,
-    var errorMessage: String? = null,
+    var videoTaskStatus: TaskStatus = TaskStatus.PENDING,
+    var llmTaskStatus: TaskStatus = TaskStatus.CREATED,
+    var taskErrorMessage: String? = null,
 
-    var resultZipFileId: Long? = null,
+    var videoDetectedZipFileId: Long? = null,
+
+    var insulatorReportFileId: Long? = null,
+    var railReportFileId: Long? = null,
+    var nestReportFileId: Long? = null,
+
+    var insulatorJsonId: Long? = null,
+    var railJsonId: Long? = null,
+    var nestJsonId: Long? = null,
 
     )

@@ -7,8 +7,7 @@ data class ProblemDetectionListResponse(
 data class ProblemDetectionListItem(
     val id: Long,
     val name: String,
-    val section: String,
-    val datetime: String,
-    val direction: String,
-    val taskStatus: String,
+    val createdAt: String,
+    val videoTaskStatus: String,
+    val llmTaskStatus: String
 )
