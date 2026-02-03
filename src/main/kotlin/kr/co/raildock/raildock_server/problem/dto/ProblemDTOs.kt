@@ -1,5 +1,6 @@
 package kr.co.raildock.raildock_server.problem.dto
 
+import kr.co.raildock.raildock_server.common.enum.ModelType
 import java.time.LocalDateTime
 import java.util.UUID
 import kr.co.raildock.raildock_server.problem.enum.*
@@ -21,6 +22,7 @@ data class ProblemDetailDto(
 
     val id: UUID,
     val detectionId: UUID,
+    val model: ModelType,
     val problemNum: String,
 
     val status: ProblemStatus,
@@ -55,6 +57,7 @@ data class ProblemCreateRequest(
 
     val detectionId: UUID,
     val problemNum: String,
+    val model: ModelType,
 
     val problemType: String,
     val problemStatus: String,
@@ -87,6 +90,7 @@ data class ProblemCreateRequest(
 data class ProblemContentUpdateRequest(
     val severity: Severity?,
     val severityReason: String?,
+    val model: ModelType?,
     val reference: String?,
     val recommendedActions: String?,
 

@@ -40,6 +40,8 @@ class ProblemServiceImpl(
             detectionId = problem.detectionId,
             problemNum = problem.problemNum,
 
+            model = problem.model,
+
             status = problem.status,
             severity = problem.severity,
             severityReason = problem.severityReason,
@@ -77,6 +79,7 @@ class ProblemServiceImpl(
             ProblemEntity(
                 detectionId = request.detectionId,
                 problemNum = request.problemNum,
+                model = request.model,
 
                 problemType = request.problemType,
                 problemStatus = request.problemStatus,
@@ -137,6 +140,7 @@ class ProblemServiceImpl(
 
         request.severity?.let { problem.severity = it }
         request.severityReason?.let { problem.severityReason = it }
+        request.model?.let { problem.model = it }
         request.reference?.let { problem.reference = it }
         request.recommendedActions?.let { problem.recommendedActions = it }
 
