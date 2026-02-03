@@ -2,6 +2,7 @@ package kr.co.raildock.raildock_server.integration.llm.pipeline
 
 import kr.co.raildock.raildock_server.integration.llm.dto.ProcessVideoRequest
 import kr.co.raildock.raildock_server.integration.llm.dto.ProcessVideoResponse
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
@@ -17,15 +18,20 @@ class LlmPipelineClientImpl(
         originalMetadataUrl: String,
         generatePdf: Boolean,
         skipReview: Boolean
-    ): ProcessVideoResponse {
+    ): ByteArray {
         val request = ProcessVideoRequest(
             videoUrl = videoUrl,
             originalMetadataUrl = originalMetadataUrl,
             generatePdf = generatePdf,
             skipReview = skipReview
         )
+
+        val zipMediaType = MediaType("application", "zip")
+
         return llmWebClient.post()
             .uri("/pipeline/process-zip")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(zipMediaType)
             .bodyValue(request)
             .retrieve()
             .onStatus({ it.isError }) { resp ->
@@ -37,7 +43,7 @@ class LlmPipelineClientImpl(
                         )
                     }
             }
-                .bodyToMono<ProcessVideoResponse>()
+                .bodyToMono<ByteArray>()
             .timeout(Duration.ofMinutes(30))
             .block()
             ?: throw IllegalStateException("LLM returned empty body")

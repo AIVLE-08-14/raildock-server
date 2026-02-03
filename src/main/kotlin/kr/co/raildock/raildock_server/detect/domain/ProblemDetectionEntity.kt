@@ -35,6 +35,8 @@ class ProblemDetectionEntity(
     var railReportFileId: Long? = null,
     var nestReportFileId: Long? = null,
 
-    var llmFileId: Long? = null,
+    var insulatorJsonId: Long? = null,
+    var railJsonId: Long? = null,
+    var nestJsonId: Long? = null,
 
     )

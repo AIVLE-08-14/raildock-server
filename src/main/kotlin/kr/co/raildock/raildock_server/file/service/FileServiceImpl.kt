@@ -16,9 +16,11 @@ import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
+import java.io.ByteArrayInputStream
 import java.io.InputStream
 import java.time.LocalDate
 import java.util.UUID.randomUUID
+import java.util.zip.ZipInputStream
 
 @Service
 class FileServiceImpl(
@@ -56,6 +58,52 @@ class FileServiceImpl(
             contentType = contentType,
             fileType = fileType
         )
+    }
+
+    override fun unzipAndUpload(zipBytes: ByteArray, parentId: Long?): List<UploadFileResponse> {
+        val results = mutableListOf<UploadFileResponse>()
+
+        ByteArrayInputStream(zipBytes).use { bais ->
+            ZipInputStream(bais).use { zis ->
+                while (true) {
+                    val entry = zis.nextEntry ?: break
+                    if (entry.isDirectory) continue
+
+                    val filename = entry.name.substringAfterLast('/')
+                    val ext = filename.substringAfterLast('.', "").lowercase()
+
+                    val contentType = when (ext) {
+                        "pdf" -> "application/pdf"
+                        "json" -> "application/json"
+                        else -> {
+                            zis.closeEntry()
+                            continue
+                        }
+                    }
+
+                    val bytes = zis.readBytes()
+
+                    val fileType = when (ext) {
+                        "pdf" -> FileType.PDF
+                        "json" -> FileType.JSON
+                        else -> FileType.ZIP
+                    }
+
+                    val finalName =
+                        if (parentId != null) "pd-$parentId-$filename" else filename
+
+                    results += uploadBytes(
+                        bytes = bytes,
+                        originalFilename = finalName,
+                        contentType = contentType,
+                        fileType = fileType
+                    )
+
+                    zis.closeEntry()
+                }
+            }
+        }
+        return results
     }
 
     private fun uploadInternal(

@@ -3,10 +3,10 @@ package kr.co.raildock.raildock_server.integration.llm.dto
 import com.fasterxml.jackson.annotation.JsonProperty
 
 data class ProcessVideoRequest(
-    @JsonProperty("video_url")
+    @JsonProperty("zip_url")
     val videoUrl: String,
 
-    @JsonProperty("original_metadata_url")
+    @JsonProperty("metadata_url")
     val originalMetadataUrl: String? = null,
 
     @JsonProperty("generate_pdf")

@@ -8,5 +8,5 @@ interface LlmPipelineClient {
         originalMetadataUrl: String,
         generatePdf: Boolean = true,
         skipReview: Boolean = false
-    ): ProcessVideoResponse
+    ): ByteArray
 }

@@ -98,7 +98,9 @@ class DetectService(
             insulatorReportUrl = pd.insulatorReportFileId?.let { fileService.getDownloadUrl(it) },
             railReportUrl = pd.railReportFileId?.let { fileService.getDownloadUrl(it) },
             nestReportUrl = pd.nestReportFileId?.let { fileService.getDownloadUrl(it) },
-            llmFileUrl = pd.llmFileId?.let { fileService.getDownloadUrl(it) }
+            insulatorJsonUrl = pd.insulatorJsonId?.let { fileService.getDownloadUrl(it) },
+            railJsonUrl = pd.railJsonId?.let { fileService.getDownloadUrl(it) },
+            nestJsonUrl = pd.nestJsonId?.let { fileService.getDownloadUrl(it) }
         )
     }
 

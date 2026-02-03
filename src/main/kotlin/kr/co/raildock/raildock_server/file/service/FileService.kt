@@ -20,6 +20,11 @@ interface FileService {
         fileType: FileType
     ): UploadFileResponse
 
+    fun unzipAndUpload(
+        zipBytes: ByteArray,
+        parentId: Long? = null
+    ): List<UploadFileResponse>
+
     fun download(fileId: Long): ResponseEntity<Resource>
 
     fun getdownloadURL(fileId: Long): ResponseEntity<String>
