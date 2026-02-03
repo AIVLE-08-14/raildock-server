@@ -15,7 +15,7 @@ import kotlin.String
 @Service
 class ProblemServiceImpl(
     private val problemRepository: ProblemRepository,
-    private val FileService: FileService
+    private val fileService: FileService
 ) : ProblemService {
 
     /* =========================
@@ -65,8 +65,8 @@ class ProblemServiceImpl(
 
             managerId = problem.managerId,
 
-            sourceImageIdURL = FileService.getDownloadUrl(problem.sourceImageId),
-            boundingBoxJsonIdURL = FileService.getDownloadUrl(problem.boundingBoxJsonId),
+            sourceImageIdURL = fileService.getDownloadUrl(problem.sourceImageId),
+            boundingBoxJsonIdURL = fileService.getDownloadUrl(problem.boundingBoxJsonId),
         )
     }
 
@@ -186,5 +186,16 @@ class ProblemServiceImpl(
             }
 
         problemRepository.delete(problem)
+    }
+
+    /* =========================
+        BBox Json 변경
+    ========================= */
+    @Transactional
+    override fun updateBoundingBoxJson(problemId: UUID, jsonFileId: Long) {
+        val problem = problemRepository.findById(problemId)
+            .orElseThrow { BusinessException(ProblemErrorCode.PROBLEM_NOT_FOUND) }
+
+        problem.boundingBoxJsonId = jsonFileId
     }
 }

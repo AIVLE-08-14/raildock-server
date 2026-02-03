@@ -35,4 +35,7 @@ interface ProblemService {
 
     /** 문제 삭제 */
     fun deleteProblem(problemId: UUID)
+
+    /** Feedback용 Json 변경 메소드 */
+    fun updateBoundingBoxJson(problemId: UUID, jsonFileId: Long)
 }

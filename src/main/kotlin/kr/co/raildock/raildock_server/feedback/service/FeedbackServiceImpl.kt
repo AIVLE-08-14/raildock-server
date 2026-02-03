@@ -7,25 +7,52 @@ import kr.co.raildock.raildock_server.feedback.dto.*
 import kr.co.raildock.raildock_server.feedback.entity.FeedbackEntity
 import kr.co.raildock.raildock_server.feedback.enum.FeedbackStatus
 import kr.co.raildock.raildock_server.feedback.repository.FeedbackRepository
+import kr.co.raildock.raildock_server.file.enum.FileType
+import kr.co.raildock.raildock_server.file.service.FileService
+import kr.co.raildock.raildock_server.problem.service.ProblemService
+import org.springframework.web.multipart.MultipartFile
 
 @Service
 @Transactional
 class FeedbackServiceImpl(
-    private val feedbackRepository: FeedbackRepository
+    private val feedbackRepository: FeedbackRepository,
+    private val fileService: FileService,
+    private val problemService: ProblemService
 ) : FeedbackService {
 
-    override fun create(request: FeedbackCreateRequest): FeedbackResponse {
-        val entity = feedbackRepository.save(
+
+    @Transactional
+    override fun create(
+        request: FeedbackCreateRequest,
+        jsonFile: MultipartFile
+    ): FeedbackResponse {
+
+        // 1️⃣ JSON 파일 업로드
+        val uploadedJson = fileService.upload(
+            file = jsonFile,
+            fileType = FileType.JSON
+        )
+
+        val jsonFileId = uploadedJson.fileId
+
+        // 2️⃣ Problem JSON 교체
+        problemService.updateBoundingBoxJson(
+            problemId = request.problemId,
+            jsonFileId = jsonFileId
+        )
+
+        // 3️⃣ Feedback 생성
+        val feedback = feedbackRepository.save(
             FeedbackEntity(
                 problemId = request.problemId,
                 model = request.model,
                 engineerId = request.engineerId,
                 feedbackStatus = FeedbackStatus.PENDING,
-                sourceImageId = request.sourceImageId,
-                boundingBoxJsonId = request.boundingBoxJsonId
+                boundingBoxJsonId = jsonFileId
             )
         )
-        return entity.toResponse()
+
+        return feedback.toResponse()
     }
 
     @Transactional(readOnly = true)

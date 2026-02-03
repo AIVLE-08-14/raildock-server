@@ -8,9 +8,7 @@ import java.time.LocalDateTime
 data class FeedbackCreateRequest(
     val problemId: UUID,
     val model: ModelType,
-    val engineerId: Long,
-    val sourceImageId: Long?,
-    val boundingBoxJsonId: Long?
+    val engineerId: Long
 )
 
 data class FeedbackResponse(

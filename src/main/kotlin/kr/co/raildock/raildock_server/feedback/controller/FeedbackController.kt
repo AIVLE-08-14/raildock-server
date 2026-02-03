@@ -7,6 +7,7 @@ import kr.co.raildock.raildock_server.feedback.dto.FeedbackCreateRequest
 import kr.co.raildock.raildock_server.feedback.dto.FeedbackResponse
 import kr.co.raildock.raildock_server.feedback.dto.FeedbackUpdateRequest
 import kr.co.raildock.raildock_server.feedback.service.FeedbackService
+import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/api/feedbacks")
@@ -14,10 +15,14 @@ class FeedbackController(
     private val feedbackService: FeedbackService
 ) {
 
-    @PostMapping
-    fun create(@RequestBody request: FeedbackCreateRequest): FeedbackResponse =
-        feedbackService.create(request)
+    @PostMapping(consumes = ["multipart/form-data"])
+    fun create(
+        @RequestPart("data") request: FeedbackCreateRequest,
+        @RequestPart("jsonFile") jsonFile: MultipartFile
+    ): FeedbackResponse =
+        feedbackService.create(request, jsonFile)
 
+    // TODO : Id 없이 전체 피드백 가져오는걸로 변경
     @GetMapping("/{id}")
     fun get(@PathVariable id: UUID): FeedbackResponse =
         feedbackService.get(id)
