@@ -11,7 +11,7 @@ import kr.co.raildock.raildock_server.feedback.service.FeedbackService
 import org.springframework.web.multipart.MultipartFile
 
 @RestController
-@RequestMapping("/api/feedbacks")
+@RequestMapping("/feedback")
 class FeedbackController(
     private val feedbackService: FeedbackService
 ) {
@@ -19,15 +19,11 @@ class FeedbackController(
     @PostMapping(consumes = ["multipart/form-data"])
     fun create(
         @RequestParam problemId: UUID,
-        @RequestParam model: ModelType,
-        @RequestParam engineerId: Long,
         @RequestParam jsonFile: MultipartFile
     ): FeedbackResponse =
         feedbackService.create(
             FeedbackCreateRequest(
-                problemId = problemId,
-                model = model,
-                engineerId = engineerId
+                problemId = problemId
             ),
             jsonFile
         )

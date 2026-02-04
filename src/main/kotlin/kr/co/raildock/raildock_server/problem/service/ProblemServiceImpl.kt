@@ -1,5 +1,6 @@
 package kr.co.raildock.raildock_server.problem.service
 
+import kr.co.raildock.raildock_server.common.enum.ModelType
 import kr.co.raildock.raildock_server.problem.dto.*
 import kr.co.raildock.raildock_server.problem.repository.ProblemRepository
 import kr.co.raildock.raildock_server.common.exception.BusinessException
@@ -197,5 +198,23 @@ class ProblemServiceImpl(
             .orElseThrow { BusinessException(ProblemErrorCode.PROBLEM_NOT_FOUND) }
 
         problem.boundingBoxJsonId = jsonFileId
+    }
+
+    @Transactional(readOnly = true)
+    override fun getProblemModel(problemId: UUID): ModelType {
+        val problem = problemRepository.findById(problemId)
+            .orElseThrow {
+                BusinessException(ProblemErrorCode.PROBLEM_NOT_FOUND)
+            }
+        return problem.model
+    }
+
+    @Transactional(readOnly = true)
+    override fun getSourceImageNumber(problemId: UUID): Long {
+        val problem = problemRepository.findById(problemId)
+            .orElseThrow {
+                BusinessException(ProblemErrorCode.PROBLEM_NOT_FOUND)
+            }
+        return problem.sourceImageId
     }
 }

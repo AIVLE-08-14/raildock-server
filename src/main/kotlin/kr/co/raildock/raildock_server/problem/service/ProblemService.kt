@@ -1,5 +1,6 @@
 package kr.co.raildock.raildock_server.problem.service
 
+import kr.co.raildock.raildock_server.common.enum.ModelType
 import kr.co.raildock.raildock_server.problem.dto.*
 import kr.co.raildock.raildock_server.problem.enum.ProblemStatus
 import java.util.UUID
@@ -38,4 +39,8 @@ interface ProblemService {
 
     /** Feedback용 Json 변경 메소드 */
     fun updateBoundingBoxJson(problemId: UUID, jsonFileId: Long)
+
+    fun getProblemModel(problemId: UUID): ModelType
+
+    fun getSourceImageNumber(problemId: UUID): Long
 }

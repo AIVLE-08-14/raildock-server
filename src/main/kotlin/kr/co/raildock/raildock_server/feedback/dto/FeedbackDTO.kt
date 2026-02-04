@@ -6,9 +6,7 @@ import kr.co.raildock.raildock_server.feedback.enum.FeedbackStatus
 import java.time.LocalDateTime
 
 data class FeedbackCreateRequest(
-    val problemId: UUID,
-    val model: ModelType,
-    val engineerId: Long
+    val problemId: UUID
 )
 
 data class FeedbackResponse(

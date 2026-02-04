@@ -10,6 +10,7 @@ import kr.co.raildock.raildock_server.feedback.repository.FeedbackRepository
 import kr.co.raildock.raildock_server.file.enum.FileType
 import kr.co.raildock.raildock_server.file.service.FileService
 import kr.co.raildock.raildock_server.problem.service.ProblemService
+import kr.co.raildock.raildock_server.user.service.UserService
 import org.springframework.web.multipart.MultipartFile
 
 @Service
@@ -17,7 +18,8 @@ import org.springframework.web.multipart.MultipartFile
 class FeedbackServiceImpl(
     private val feedbackRepository: FeedbackRepository,
     private val fileService: FileService,
-    private val problemService: ProblemService
+    private val problemService: ProblemService,
+    private val userService: UserService
 ) : FeedbackService {
 
     override fun create(
@@ -31,6 +33,10 @@ class FeedbackServiceImpl(
         )
         val jsonFileId = uploadedJson.fileId
 
+        val modelType = problemService.getProblemModel(request.problemId)
+        val sourceImageId = problemService.getSourceImageNumber(request.problemId)
+        val engineerId = userService.getMyId()
+
         problemService.updateBoundingBoxJson(
             problemId = request.problemId,
             jsonFileId = jsonFileId
@@ -39,9 +45,10 @@ class FeedbackServiceImpl(
         val feedback = feedbackRepository.save(
             FeedbackEntity(
                 problemId = request.problemId,
-                model = request.model,
-                engineerId = request.engineerId,
+                model = modelType,
+                engineerId = engineerId,
                 feedbackStatus = FeedbackStatus.PENDING,
+                sourceImageId = sourceImageId,
                 boundingBoxJsonId = jsonFileId
             )
         )
@@ -55,7 +62,6 @@ class FeedbackServiceImpl(
             sourceImageId = feedback.sourceImageId,
             boundingBoxJsonId = feedback.boundingBoxJsonId,
             createdTime = feedback.createdTime
-            // 🔜 여기서 URL 생성 가능
         )
     }
 
