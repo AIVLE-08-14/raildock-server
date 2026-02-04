@@ -1,6 +1,7 @@
 package kr.co.raildock.raildock_server.feedback.controller
 
 import io.swagger.v3.oas.annotations.tags.Tag
+import kr.co.raildock.raildock_server.common.enum.ModelType
 import org.springframework.web.bind.annotation.*
 import java.util.UUID
 import kr.co.raildock.raildock_server.feedback.dto.FeedbackCreateRequest
@@ -17,10 +18,19 @@ class FeedbackController(
 
     @PostMapping(consumes = ["multipart/form-data"])
     fun create(
-        @RequestPart("data") request: FeedbackCreateRequest,
-        @RequestPart("jsonFile") jsonFile: MultipartFile
+        @RequestParam problemId: UUID,
+        @RequestParam model: ModelType,
+        @RequestParam engineerId: Long,
+        @RequestParam jsonFile: MultipartFile
     ): FeedbackResponse =
-        feedbackService.create(request, jsonFile)
+        feedbackService.create(
+            FeedbackCreateRequest(
+                problemId = problemId,
+                model = model,
+                engineerId = engineerId
+            ),
+            jsonFile
+        )
 
     @GetMapping
     fun getList(): List<FeedbackResponse> =

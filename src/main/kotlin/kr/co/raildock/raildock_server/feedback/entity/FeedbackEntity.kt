@@ -25,7 +25,7 @@ class FeedbackEntity(
     @Column(name = "created_time", nullable = false)
     var createdTime: LocalDateTime = LocalDateTime.now(),
 
-    @Column(name = "engineer_id", nullable = false, columnDefinition = "BINARY(16)")
+    @Column(name = "engineer_id", nullable = false)
     var engineerId: Long,
 
     @Enumerated(EnumType.STRING)
