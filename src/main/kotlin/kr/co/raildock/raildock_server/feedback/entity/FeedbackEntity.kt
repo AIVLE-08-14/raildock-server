@@ -23,18 +23,18 @@ class FeedbackEntity(
     val model: ModelType,
 
     @Column(name = "created_time", nullable = false)
-    val createdTime: LocalDateTime = LocalDateTime.now(),
+    var createdTime: LocalDateTime = LocalDateTime.now(),
 
     @Column(name = "engineer_id", nullable = false, columnDefinition = "BINARY(16)")
-    val engineerId: Long,
+    var engineerId: Long,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "feedback_status")
-    val feedbackStatus: FeedbackStatus,
+    var feedbackStatus: FeedbackStatus,
 
     @Column(name = "source_image_id")
-    val sourceImageId: Long? = null,
+    var sourceImageId: Long? = null,
 
     @Column(name = "bounding_box_json_id")
-    val boundingBoxJsonId: Long? = null
+    var boundingBoxJsonId: Long? = null
 )

@@ -22,16 +22,15 @@ class FeedbackController(
     ): FeedbackResponse =
         feedbackService.create(request, jsonFile)
 
-    // TODO : Id 없이 전체 피드백 가져오는걸로 변경
+    @GetMapping
+    fun getList(): List<FeedbackResponse> =
+        feedbackService.getList()
+
     @GetMapping("/{id}")
     fun get(@PathVariable id: UUID): FeedbackResponse =
         feedbackService.get(id)
 
-    @GetMapping("/problem/{problemId}")
-    fun getByProblem(@PathVariable problemId: UUID): List<FeedbackResponse> =
-        feedbackService.getByProblem(problemId)
-
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     fun update(
         @PathVariable id: UUID,
         @RequestBody request: FeedbackUpdateRequest

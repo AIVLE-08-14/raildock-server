@@ -13,9 +13,9 @@ interface FeedbackService {
         jsonFile: MultipartFile
     ): FeedbackResponse
 
-    fun get(feedbackId: UUID): FeedbackResponse
+    fun getList(): List<FeedbackResponse>
 
-    fun getByProblem(problemId: UUID): List<FeedbackResponse>
+    fun get(feedbackId: UUID): FeedbackResponse
 
     fun update(feedbackId: UUID, request: FeedbackUpdateRequest): FeedbackResponse
 
