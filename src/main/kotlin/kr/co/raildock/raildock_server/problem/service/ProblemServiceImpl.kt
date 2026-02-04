@@ -1,5 +1,6 @@
 package kr.co.raildock.raildock_server.problem.service
 
+import kr.co.raildock.raildock_server.common.enum.ModelType
 import kr.co.raildock.raildock_server.problem.dto.*
 import kr.co.raildock.raildock_server.problem.repository.ProblemRepository
 import kr.co.raildock.raildock_server.common.exception.BusinessException
@@ -15,7 +16,7 @@ import kotlin.String
 @Service
 class ProblemServiceImpl(
     private val problemRepository: ProblemRepository,
-    private val FileService: FileService
+    private val fileService: FileService
 ) : ProblemService {
 
     /* =========================
@@ -40,6 +41,8 @@ class ProblemServiceImpl(
             detectionId = problem.detectionId,
             problemNum = problem.problemNum,
 
+            model = problem.model,
+
             status = problem.status,
             severity = problem.severity,
             severityReason = problem.severityReason,
@@ -63,8 +66,8 @@ class ProblemServiceImpl(
 
             managerId = problem.managerId,
 
-            sourceImageIdURL = FileService.getDownloadUrl(problem.sourceImageId),
-            boundingBoxJsonIdURL = FileService.getDownloadUrl(problem.boundingBoxJsonId),
+            sourceImageIdURL = fileService.getDownloadUrl(problem.sourceImageId),
+            boundingBoxJsonIdURL = fileService.getDownloadUrl(problem.boundingBoxJsonId),
         )
     }
 
@@ -77,6 +80,7 @@ class ProblemServiceImpl(
             ProblemEntity(
                 detectionId = request.detectionId,
                 problemNum = request.problemNum,
+                model = request.model,
 
                 problemType = request.problemType,
                 problemStatus = request.problemStatus,
@@ -137,6 +141,7 @@ class ProblemServiceImpl(
 
         request.severity?.let { problem.severity = it }
         request.severityReason?.let { problem.severityReason = it }
+        request.model?.let { problem.model = it }
         request.reference?.let { problem.reference = it }
         request.recommendedActions?.let { problem.recommendedActions = it }
 
@@ -182,5 +187,34 @@ class ProblemServiceImpl(
             }
 
         problemRepository.delete(problem)
+    }
+
+    /* =========================
+        BBox Json 변경
+    ========================= */
+    @Transactional
+    override fun updateBoundingBoxJson(problemId: UUID, jsonFileId: Long) {
+        val problem = problemRepository.findById(problemId)
+            .orElseThrow { BusinessException(ProblemErrorCode.PROBLEM_NOT_FOUND) }
+
+        problem.boundingBoxJsonId = jsonFileId
+    }
+
+    @Transactional(readOnly = true)
+    override fun getProblemModel(problemId: UUID): ModelType {
+        val problem = problemRepository.findById(problemId)
+            .orElseThrow {
+                BusinessException(ProblemErrorCode.PROBLEM_NOT_FOUND)
+            }
+        return problem.model
+    }
+
+    @Transactional(readOnly = true)
+    override fun getSourceImageNumber(problemId: UUID): Long {
+        val problem = problemRepository.findById(problemId)
+            .orElseThrow {
+                BusinessException(ProblemErrorCode.PROBLEM_NOT_FOUND)
+            }
+        return problem.sourceImageId
     }
 }

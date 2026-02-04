@@ -1,6 +1,7 @@
 package kr.co.raildock.raildock_server.problem.entity
 
 import jakarta.persistence.*
+import kr.co.raildock.raildock_server.common.enum.ModelType
 import java.time.LocalDateTime
 import java.util.UUID
 import kr.co.raildock.raildock_server.problem.enum.*
@@ -18,6 +19,10 @@ class ProblemEntity(
     // TODO : 탐지결과 FK 해줘야함
     @Column(nullable = false)
     var detectionId: UUID,
+
+    /** 어떤모델일까 ~ */
+    @Column(nullable = false)
+    var model : ModelType,
 
     /** 업무용 결함 번호 */
     @Column(nullable = false, length = 100)
