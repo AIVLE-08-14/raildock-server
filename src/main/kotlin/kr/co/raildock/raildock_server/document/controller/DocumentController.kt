@@ -14,7 +14,7 @@ import java.util.UUID
     description = "유지보수 문서 및 개정이력 관리"
 )
 @RestController
-@RequestMapping("/documents")
+@RequestMapping("/api/documents")
 class DocumentController(
     private val documentService: DocumentServiceImpl
 ) {

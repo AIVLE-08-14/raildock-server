@@ -16,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile
     description = "엔지니어 피드백 관리"
 )
 @RestController
-@RequestMapping("/feedback")
+@RequestMapping("/api/feedback")
 class FeedbackController(
     private val feedbackService: FeedbackService
 ) {

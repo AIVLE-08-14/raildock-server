@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*
     description = "세션 기반 사용자 인증 API (회원가입, 로그인, 로그아웃, 마이프로필)"
 )
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 class AuthController(
     private val userService: UserService
 ) {

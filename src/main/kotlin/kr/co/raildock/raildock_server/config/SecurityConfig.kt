@@ -37,8 +37,8 @@ class SecurityConfig {
             .csrf { it.disable() }
             .authorizeHttpRequests { auth ->
                 auth.requestMatchers(
-                    "/auth/login",
-                    "/auth/signup",
+                    "/api/auth/login",
+                    "/api/auth/signup",
                     "/swagger-ui/**",
                     "/health/**",
                     "/docs/**",

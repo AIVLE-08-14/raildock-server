@@ -17,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile
     description = "결함 탐지 관리"
 )
 @RestController
-@RequestMapping("/detect")
+@RequestMapping("/api/detect")
 class DetectController(
     private val service: DetectService,
 ) {

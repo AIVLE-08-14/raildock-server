@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/fine-tuning")
+@RequestMapping("/api/fine-tuning")
 class FineTuningController(
     private val fineTuningService: FineTuningService
 ) {

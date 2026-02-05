@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*
     description = "메인화면 dashboard용 Problem 호출 API"
 )
 @RestController
-@RequestMapping("/dashboard/problem")
+@RequestMapping("/api/dashboard/problem")
 class ProblemDashboardController(
     private val problemDashboardService: ProblemDashboardService
 ) {
