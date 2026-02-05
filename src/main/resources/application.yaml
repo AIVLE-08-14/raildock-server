@@ -38,7 +38,7 @@ integration:
   llm:
     url: http://localhost:8000
   vision:
-    url: http://hsyoon14.iptime.org:18000
+    url: ${VISION_URL}
 
 aws:
   region: ap-northeast-2
