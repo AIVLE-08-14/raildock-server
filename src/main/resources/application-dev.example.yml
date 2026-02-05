@@ -2,3 +2,6 @@ aws:
   credentials:
     access-key: YOUR_ACCESS_KEY
     secret-key: YOUR_SECRET_KEY
+integration:
+    vision:
+        url: http://your-vision-service-url

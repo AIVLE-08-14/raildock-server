@@ -37,8 +37,6 @@ logging:
 integration:
   llm:
     url: http://localhost:8000
-  vision:
-    url: ${VISION_URL}
 
 aws:
   region: ap-northeast-2
