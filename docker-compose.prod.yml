@@ -31,6 +31,8 @@ services:
       SPRING_DATASOURCE_USERNAME: raildock
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
       TZ: Asia/Seoul
+      VISION_URL: ${VISION_URL}
+      LLM_URL: ${LLM_URL}
     ports:
       - "8080:8080"
     restart: always
