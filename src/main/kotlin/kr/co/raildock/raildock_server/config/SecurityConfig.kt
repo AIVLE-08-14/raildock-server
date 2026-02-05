@@ -37,7 +37,8 @@ class SecurityConfig {
             .csrf { it.disable() }
             .authorizeHttpRequests { auth ->
                 auth.requestMatchers(
-                    "/auth/**",
+                    "/auth/login",
+                    "/auth/signup",
                     "/swagger-ui/**",
                     "/health/**",
                     "/docs/**",
@@ -58,9 +59,9 @@ class SecurityConfig {
             "http://localhost:8080",
             "http://localhost:5173",
             "http://localhost:8000",
-            "http://localhost:8000",
+            "http://localhost:80",
             "http://raildock-front.s3-website.ap-northeast-2.amazonaws.com",
-            "https://d254ev2nsrf794.cloudfront.net/auth"
+            "https://d254ev2nsrf794.cloudfront.net"
         )
         config.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
         config.allowedHeaders = listOf("*")
