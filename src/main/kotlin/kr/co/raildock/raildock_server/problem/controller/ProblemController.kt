@@ -14,7 +14,7 @@ import java.util.UUID
     description = "문제(결함) 조회 및 관리"
 )
 @RestController
-@RequestMapping("/problems")
+@RequestMapping("/api/problems")
 class ProblemController(
     private val problemService: ProblemService
 ) {

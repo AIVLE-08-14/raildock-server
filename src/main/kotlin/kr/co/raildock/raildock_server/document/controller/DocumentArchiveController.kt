@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController
     description = "유지보수 문서 및 개정이력 전체 다운로드 - 나중에 호출제한 걸어야함"
 )
 @RestController
-@RequestMapping("/archive")
+@RequestMapping("/api/archive")
 class DocumentArchiveController(
     private val documentArchiveService: DocumentArchiveService
 ) {
