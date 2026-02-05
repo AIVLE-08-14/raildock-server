@@ -57,7 +57,10 @@ class SecurityConfig {
         config.allowedOrigins = listOf(
             "http://localhost:8080",
             "http://localhost:5173",
-            "http://localhost:8000"
+            "http://localhost:8000",
+            "http://localhost:8000",
+            "http://raildock-front.s3-website.ap-northeast-2.amazonaws.com",
+            "https://d254ev2nsrf794.cloudfront.net/auth"
         )
         config.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
         config.allowedHeaders = listOf("*")
