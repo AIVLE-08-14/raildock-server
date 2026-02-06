@@ -19,8 +19,4 @@ data class ProblemDetectionGetResponse(
     val insulatorReportUrl: String?,
     val railReportUrl: String?,
     val nestReportUrl: String?,
-
-    val insulatorJsonUrl: String?,
-    val railJsonUrl: String?,
-    val nestJsonUrl: String?
 )
