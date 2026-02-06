@@ -27,6 +27,7 @@ class ProblemDetectionEntity(
 
     var videoTaskStatus: TaskStatus = TaskStatus.PENDING,
     var llmTaskStatus: TaskStatus = TaskStatus.CREATED,
+    @Column(columnDefinition = "MEDIUMTEXT")
     var taskErrorMessage: String? = null,
 
     var videoDetectedZipFileId: Long? = null,

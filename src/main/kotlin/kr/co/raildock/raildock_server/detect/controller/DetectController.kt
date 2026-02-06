@@ -21,12 +21,6 @@ import org.springframework.web.multipart.MultipartFile
 class DetectController(
     private val service: DetectService,
 ) {
-    /*
-    최소 검증?
-    영상이 하나도 없으면 400
-    datetime 형식 체크?
-    */
-
     @Operation(summary = "Problem Detection 생성(동영상 업로드)")
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun create(
