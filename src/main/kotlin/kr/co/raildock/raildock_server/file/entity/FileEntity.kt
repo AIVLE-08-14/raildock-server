@@ -13,6 +13,9 @@ class FileEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
 
+    @Column(nullable = true)
+    val parentId: Long? = null,
+
     @Column(nullable = false, unique = true)
     val s3Key: String,
 

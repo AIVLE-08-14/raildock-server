@@ -18,7 +18,7 @@ class ProblemEntity(
     /** 탐지 결과 ID */
     // TODO : 탐지결과 FK 해줘야함
     @Column(nullable = false)
-    var detectionId: UUID,
+    var detectionId: Long,
 
     /** 어떤모델일까 ~ */
     @Column(nullable = false)

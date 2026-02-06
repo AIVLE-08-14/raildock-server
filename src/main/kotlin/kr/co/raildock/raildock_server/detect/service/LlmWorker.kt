@@ -1,11 +1,15 @@
 package kr.co.raildock.raildock_server.detect.service
 
+import kr.co.raildock.raildock_server.common.enum.ModelType
 import kr.co.raildock.raildock_server.detect.domain.ProblemDetectionEntity
 import kr.co.raildock.raildock_server.detect.domain.TaskStatus
 import kr.co.raildock.raildock_server.detect.repository.ProblemDetectionRepository
+import kr.co.raildock.raildock_server.file.enum.FileType
 import kr.co.raildock.raildock_server.file.service.FileService
 import kr.co.raildock.raildock_server.integration.llm.LlmClient
 import org.springframework.stereotype.Component
+import java.io.ByteArrayInputStream
+import java.util.zip.ZipInputStream
 
 
 @Component
@@ -13,7 +17,8 @@ class LlmWorker(
     detectRepo: ProblemDetectionRepository,
     private val fileService: FileService,
     private val llmClient: LlmClient,
-    private val tx: TaskTxService
+    private val tx: TaskTxService,
+    private val problemImportService: ProblemImportService
 ) : AbstractTaskWorker(detectRepo) {
 
     private val INSULATOR_KEYS = listOf("insulator", "애자")
@@ -52,33 +57,27 @@ class LlmWorker(
                 skipReview = false
             )
 
-            // 3. unzip + upload
-            val outputs = fileService.unzipAndUpload(response, parentId = id)
+            // 3. unzip
+            val parsed = parseLLMZip(response, parentId = id)
 
-            // 4. REQUIRES_NEW로 확실하게 DB 저장 - 파일 이름 기반 매핑
-            tx.completeLlm(id) { entity ->
-                outputs.forEach { output ->
-                    val name = output.originalFilename.lowercase()
-
-                    fun containsAny(keys: List<String>) = keys.any { key -> name.contains(key) }
-
-                    when {
-                        containsAny(INSULATOR_KEYS) && name.endsWith(".pdf") ->
-                            entity.insulatorReportFileId = output.fileId
-                        containsAny(RAIL_KEYS) && name.endsWith(".pdf") ->
-                            entity.railReportFileId = output.fileId
-                        containsAny(NEST_KEYS) && name.endsWith(".pdf") ->
-                            entity.nestReportFileId = output.fileId
-
-                        containsAny(INSULATOR_KEYS) && name.endsWith(".json") ->
-                            entity.insulatorJsonId = output.fileId
-                        containsAny(RAIL_KEYS) && name.endsWith(".json") ->
-                            entity.railJsonId = output.fileId
-                        containsAny(NEST_KEYS) && name.endsWith(".json") ->
-                            entity.nestJsonId = output.fileId
-                    }
-                }
+            // JSON -> Problem Mapping
+            parsed.insulatorReportJson?.let { jsonBytes ->
+                problemImportService.importFromReportJson(pd, ModelType.INSULATOR, jsonBytes)
             }
+            parsed.railReportJson?.let { jsonBytes ->
+                problemImportService.importFromReportJson(pd, ModelType.RAIL, jsonBytes)
+            }
+            parsed.nestReportJson?.let { jsonBytes ->
+                problemImportService.importFromReportJson(pd, ModelType.NEST, jsonBytes)
+            }
+
+            // PDF -> File 저장 + Complete
+            tx.completeLlm(id) { detection ->
+                parsed.insulatorPDFId?.let { detection.insulatorReportFileId = it }
+                parsed.railPDFId?.let { detection.railReportFileId = it }
+                parsed.nestPDFId?.let { detection.nestReportFileId = it }
+            }
+
         } catch (e: Exception) {
             tx.failLlm(id, e.message ?: e.javaClass.simpleName)
         }
@@ -87,5 +86,85 @@ class LlmWorker(
     override fun onError(pd: ProblemDetectionEntity, e: Exception) {
         val id = pd.id ?: return
         tx.failLlm(id, e.message ?: e.javaClass.simpleName)
+    }
+
+    private class LLMZipParsed(
+        val insulatorPDFId: Long? = null,
+        val railPDFId: Long? = null,
+        val nestPDFId: Long? = null,
+        val insulatorReportJson: ByteArray? = null,
+        val railReportJson: ByteArray? = null,
+        val nestReportJson: ByteArray? = null,
+        )
+
+    private fun parseLLMZip(zipBytes: ByteArray, parentId: Long?): LLMZipParsed {
+        var insPdf: Long? = null
+        var railPdf: Long? = null
+        var nestPdf: Long? = null
+        var insJson: ByteArray? = null
+        var railJson: ByteArray? = null
+        var nestJson: ByteArray? = null
+
+        fun detectModel(nameLower: String): ModelType? = when {
+            INSULATOR_KEYS.any { nameLower.contains(it) } -> ModelType.INSULATOR
+            RAIL_KEYS.any { nameLower.contains(it) } -> ModelType.RAIL
+            NEST_KEYS.any { nameLower.contains(it) } -> ModelType.NEST
+            else -> null
+        }
+
+        ZipInputStream(ByteArrayInputStream(zipBytes)).use { zis ->
+            while (true) {
+                val entry = zis.nextEntry ?: break
+                if (entry.isDirectory) continue
+
+                val entryName = entry.name
+                val filename = entryName.substringAfterLast('/')
+                val lower = filename.lowercase()
+                val ext = filename.substringAfterLast('.', "").lowercase()
+
+                val model = detectModel(lower)
+                if(model == null) {
+                    zis.closeEntry()
+                    continue
+                }
+
+                val bytes = zis.readBytes()
+
+                when (ext) {
+                    "pdf" -> {
+                        val uploaded = fileService.uploadBytes(
+                            bytes = bytes,
+                            originalFilename = "llm/$filename",
+                            contentType = "application/pdf",
+                            fileType = FileType.PDF,
+                            parentId = parentId
+                        )
+                        when (model) {
+                            ModelType.INSULATOR -> insPdf = uploaded.fileId
+                            ModelType.RAIL -> railPdf = uploaded.fileId
+                            ModelType.NEST -> nestPdf = uploaded.fileId
+                        }
+                    }
+                    "json" -> {
+                        when (model) {
+                            ModelType.INSULATOR -> insJson = bytes
+                            ModelType.RAIL -> railJson = bytes
+                            ModelType.NEST -> nestJson = bytes
+                        }
+                    }
+                }
+
+                zis.closeEntry()
+            }
+        }
+
+        return LLMZipParsed(
+            insulatorPDFId = insPdf,
+            railPDFId = railPdf,
+            nestPDFId = nestPdf,
+            insulatorReportJson = insJson,
+            railReportJson = railJson,
+            nestReportJson = nestJson
+        )
     }
 }

@@ -21,7 +21,7 @@ data class ProblemSummaryDto(
 data class ProblemDetailDto(
 
     val id: UUID,
-    val detectionId: UUID,
+    val detectionId: Long,
     val model: ModelType,
     val problemNum: String,
 
@@ -55,7 +55,7 @@ data class ProblemDetailDto(
 
 data class ProblemCreateRequest(
 
-    val detectionId: UUID,
+    val detectionId: Long,
     val problemNum: String,
     val model: ModelType,
 

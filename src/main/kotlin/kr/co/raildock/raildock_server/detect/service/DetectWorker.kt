@@ -8,6 +8,8 @@ import kr.co.raildock.raildock_server.file.enum.FileType
 import kr.co.raildock.raildock_server.file.service.FileService
 import kr.co.raildock.raildock_server.integration.vision.VisionClientImpl
 import org.springframework.stereotype.Component
+import java.io.ByteArrayInputStream
+import java.util.zip.ZipInputStream
 
 @Component
 class DetectWorker(
@@ -63,7 +65,13 @@ class DetectWorker(
                 fileType = FileType.ZIP
             )
 
-            // 5. 완료 처리
+            // 5. 압축 해제 후 파일 저장
+            unzipAndUploadVisionOutputs(
+                zipBytes = zipBytes,
+                parentId = id
+            )
+
+            // 6. 완료 처리
             tx.completeVideo(id) { entity ->
                 entity.videoDetectedZipFileId = result.fileId
 
@@ -80,5 +88,77 @@ class DetectWorker(
     override fun onError(pd: ProblemDetectionEntity, e: Exception) {
         pd.videoTaskStatus = TaskStatus.FAILED
         pd.taskErrorMessage = (e.message ?: e.javaClass.simpleName).take(500)
+    }
+
+    private fun unzipAndUploadVisionOutputs(
+        zipBytes: ByteArray,
+        parentId: Long
+    ): Int {
+        var uploadedCount = 0
+
+        // 파일이름 정규화
+        fun norm(entryName: String): String =
+            entryName.substringAfterLast('/').substringAfterLast('\\')
+
+        // 모델 감지
+        fun detectModel(entryNameLower: String): String? = when {
+            entryNameLower.contains("/insulator/") || entryNameLower.contains("insulator") || entryNameLower.contains("애자") -> "insulator"
+            entryNameLower.contains("/rail/") || entryNameLower.contains("rail") || entryNameLower.contains("선로") -> "rail"
+            entryNameLower.contains("/nest/") || entryNameLower.contains("nest") || entryNameLower.contains("둥지") -> "nest"
+            else -> null
+        }
+
+        // 종류 감지
+        fun detectKind(entryNameLower: String): String? = when {
+            entryNameLower.contains("/origin/") && (entryNameLower.endsWith(".jpg") || entryNameLower.endsWith(".jpeg")) -> "origin"
+            entryNameLower.contains("/json/") && entryNameLower.endsWith(".json") -> "json"
+            else -> null
+        }
+
+        // 입력 처리
+        ZipInputStream(ByteArrayInputStream(zipBytes)).use { zis ->
+            while (true) {
+                val entry = zis.nextEntry ?: break
+                if (entry.isDirectory) continue
+
+                val entryName = entry.name
+                val lower = entryName.lowercase()
+
+                val model = detectModel(lower) ?: continue     // ✅ 모델 없는 파일은 스킵
+                val kind = detectKind(lower) ?: continue       // ✅ origin jpg / json json만 통과
+
+                val bytes = zis.readBytes()
+                val filename = norm(entryName)
+
+                // 파일 content 타입 분류
+                val contentType = when {
+                    filename.lowercase().endsWith(".jpg") || filename.lowercase().endsWith(".jpeg") -> "image/jpeg"
+                    filename.lowercase().endsWith(".json") -> "application/json"
+                    else -> "application/octet-stream"
+                }
+
+                // 파일 시스템 타입 분류
+                val fileType = when {
+                    filename.lowercase().endsWith(".jpg") || filename.lowercase().endsWith(".jpeg") -> FileType.IMAGE
+                    filename.lowercase().endsWith(".json") -> FileType.JSON
+                    else -> FileType.ETC
+                }
+
+                // 저장 경로를 모델/종류로 강제
+                val storedName = "$model/$kind/$filename"
+
+                fileService.uploadBytes(
+                    bytes = bytes,
+                    originalFilename = storedName,
+                    contentType = contentType,
+                    fileType = fileType,
+                    parentId = parentId
+                )
+
+                uploadedCount++
+            }
+        }
+
+        return uploadedCount
     }
 }

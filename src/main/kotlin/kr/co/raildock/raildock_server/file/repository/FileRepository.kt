@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface FileRepository : JpaRepository<FileEntity, Long> {
 
+    fun findByParentIdAndOriginalFilenameAndStatus(parentId: Long, originalFilename: String, status: FileStatus): FileEntity?
+
     fun findByIdAndStatus(
         id: Long,
         status: FileStatus = FileStatus.ACTIVE

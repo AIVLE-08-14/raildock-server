@@ -3,6 +3,7 @@ package kr.co.raildock.raildock_server.file.service
 import kr.co.raildock.raildock_server.config.AwsProperties
 import kr.co.raildock.raildock_server.file.dto.UploadFileResponse
 import kr.co.raildock.raildock_server.file.entity.FileEntity
+import kr.co.raildock.raildock_server.file.enum.FileStatus
 import kr.co.raildock.raildock_server.file.enum.FileType
 import kr.co.raildock.raildock_server.file.repository.FileRepository
 import org.springframework.core.io.InputStreamResource
@@ -12,6 +13,8 @@ import org.springframework.http.MediaType.parseMediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.bodyToMono
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
@@ -26,7 +29,8 @@ import java.util.zip.ZipInputStream
 class FileServiceImpl(
     private val fileRepository: FileRepository,
     private val s3Client: S3Client,
-    private val awsProperties: AwsProperties
+    private val awsProperties: AwsProperties,
+    private val webClient: WebClient
 ) : FileService {
 
     override fun upload(file: MultipartFile, fileType: FileType): UploadFileResponse {
@@ -49,69 +53,32 @@ class FileServiceImpl(
         bytes: ByteArray,
         originalFilename: String,
         contentType: String,
-        fileType: FileType
+        fileType: FileType,
+        parentId: Long?
     ): UploadFileResponse {
         return uploadInternal(
             requestBody = RequestBody.fromBytes(bytes),
             size = bytes.size.toLong(),
             originalFilename = originalFilename,
             contentType = contentType,
-            fileType = fileType
+            fileType = fileType,
+            parentId = parentId
         )
     }
-
-    override fun unzipAndUpload(zipBytes: ByteArray, parentId: Long?): List<UploadFileResponse> {
-        val results = mutableListOf<UploadFileResponse>()
-
-        ByteArrayInputStream(zipBytes).use { bais ->
-            ZipInputStream(bais).use { zis ->
-                while (true) {
-                    val entry = zis.nextEntry ?: break
-                    if (entry.isDirectory) continue
-
-                    val filename = entry.name.substringAfterLast('/')
-                    val ext = filename.substringAfterLast('.', "").lowercase()
-
-                    val contentType = when (ext) {
-                        "pdf" -> "application/pdf"
-                        "json" -> "application/json"
-                        else -> {
-                            zis.closeEntry()
-                            continue
-                        }
-                    }
-
-                    val bytes = zis.readBytes()
-
-                    val fileType = when (ext) {
-                        "pdf" -> FileType.PDF
-                        "json" -> FileType.JSON
-                        else -> FileType.ZIP
-                    }
-
-                    val finalName =
-                        if (parentId != null) "pd-$parentId-$filename" else filename
-
-                    results += uploadBytes(
-                        bytes = bytes,
-                        originalFilename = finalName,
-                        contentType = contentType,
-                        fileType = fileType
-                    )
-
-                    zis.closeEntry()
-                }
-            }
-        }
-        return results
-    }
+    override fun downloadBytes(url: String): ByteArray =
+        webClient.get()
+            .uri(url)
+            .retrieve()
+            .bodyToMono<ByteArray>()
+            .block() ?: throw IllegalStateException("Failed to download report json: $url")
 
     private fun uploadInternal(
         requestBody: RequestBody,
         size: Long,
         originalFilename: String,
         contentType: String,
-        fileType: FileType
+        fileType: FileType,
+        parentId: Long? = null
     ): UploadFileResponse {
         val s3Key = generateS3Key(fileType, originalFilename)
 
@@ -129,7 +96,8 @@ class FileServiceImpl(
                 contentType = contentType,
                 size = size,
                 originalFilename = originalFilename,
-                bucket = awsProperties.s3.bucket
+                bucket = awsProperties.s3.bucket,
+                parentId = parentId
             )
         )
 
@@ -182,6 +150,16 @@ class FileServiceImpl(
             .contentType(parseMediaType(file.contentType))
             .contentLength(file.size)
             .body(resource)
+    }
+
+    override fun findFileId(parentId: Long, originalFilename: String): Long? {
+        val file = fileRepository.findByParentIdAndOriginalFilenameAndStatus(
+            parentId = parentId,
+            originalFilename = originalFilename,
+            status = FileStatus.ACTIVE
+        ) ?: return null
+
+        return file.id
     }
 
     override fun deleteFile(fileId: Long) {

@@ -27,6 +27,7 @@ class ProblemDetectionEntity(
 
     var videoTaskStatus: TaskStatus = TaskStatus.PENDING,
     var llmTaskStatus: TaskStatus = TaskStatus.CREATED,
+    @Column(columnDefinition = "MEDIUMTEXT")
     var taskErrorMessage: String? = null,
 
     var videoDetectedZipFileId: Long? = null,
@@ -34,9 +35,5 @@ class ProblemDetectionEntity(
     var insulatorReportFileId: Long? = null,
     var railReportFileId: Long? = null,
     var nestReportFileId: Long? = null,
-
-    var insulatorJsonId: Long? = null,
-    var railJsonId: Long? = null,
-    var nestJsonId: Long? = null,
 
     )
