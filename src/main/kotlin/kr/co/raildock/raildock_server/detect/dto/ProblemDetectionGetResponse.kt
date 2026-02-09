@@ -1,5 +1,7 @@
 package kr.co.raildock.raildock_server.detect.dto
 
+import kr.co.raildock.raildock_server.problem.dto.ProblemModelSummaryDto
+
 data class ProblemDetectionGetResponse(
     val id: Long,
     val name: String,
@@ -19,4 +21,11 @@ data class ProblemDetectionGetResponse(
     val insulatorReportUrl: String?,
     val railReportUrl: String?,
     val nestReportUrl: String?,
+    val problems : DetectionProblemSummaryResponse?,
+)
+
+data class DetectionProblemSummaryResponse(
+    val insulator: List<ProblemModelSummaryDto>,
+    val rail: List<ProblemModelSummaryDto>,
+    val nest: List<ProblemModelSummaryDto>
 )

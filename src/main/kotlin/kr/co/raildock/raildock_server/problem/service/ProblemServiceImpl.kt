@@ -217,4 +217,10 @@ class ProblemServiceImpl(
             }
         return problem.sourceImageId
     }
+
+    @Transactional(readOnly = true)
+    override fun getProblemSummariesByDetectionId(
+        detectionId: Long
+    ): List<ProblemModelSummaryDto> =
+        problemRepository.findSummariesByDetectionId(detectionId)
 }

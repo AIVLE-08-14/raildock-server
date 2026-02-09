@@ -17,6 +17,18 @@ data class ProblemSummaryDto(
     val detectedTime: LocalDateTime
 )
 
+data class ProblemModelSummaryDto(
+    val id: UUID,
+    val problemNum: String,
+    val problemType: String,
+    val model: ModelType,
+    val severity: Severity,
+    val status: ProblemStatus,
+    val railType: RailType,
+    val latitude: Double,
+    val longitude: Double,
+    val detectedTime: LocalDateTime
+)
 
 data class ProblemDetailDto(
 

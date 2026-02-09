@@ -43,4 +43,6 @@ interface ProblemService {
     fun getProblemModel(problemId: UUID): ModelType
 
     fun getSourceImageNumber(problemId: UUID): Long
+
+    fun getProblemSummariesByDetectionId(detectionId: Long): List<ProblemModelSummaryDto>
 }

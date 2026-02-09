@@ -1,5 +1,6 @@
 package kr.co.raildock.raildock_server.problem.repository
 
+import kr.co.raildock.raildock_server.problem.dto.ProblemModelSummaryDto
 import kr.co.raildock.raildock_server.problem.entity.ProblemEntity
 import org.springframework.data.jpa.repository.JpaRepository
 import java.util.UUID
@@ -47,4 +48,24 @@ interface ProblemRepository : JpaRepository<ProblemEntity, UUID> {
     fun findByStatusIn(
         statuses: List<ProblemStatus>
     ): List<ProblemEntity>
+
+    @Query("""
+        select new kr.co.raildock.raildock_server.problem.dto.ProblemModelSummaryDto(
+            p.id,
+            p.problemNum,
+            p.problemType,
+            p.model,
+            p.severity,
+            p.status,
+            p.railType,
+            p.latitude,
+            p.longitude,
+            p.detectedTime
+        )
+        from ProblemEntity p
+        where p.detectionId = :detectionId
+    """)
+    fun findSummariesByDetectionId(
+        @Param("detectionId") detectionId: Long
+    ): List<ProblemModelSummaryDto>
 }
