@@ -67,4 +67,40 @@ class VisionClientImpl(
             .timeout(Duration.ofSeconds(10))
             .block() ?: throw IllegalStateException("FastAPI /health returned empty body")
     }
+
+    override fun feedbackUrl(req: FeedbackUrlRequest): FeedbackUrlResponse {
+        log.info("FastAPI feedback_url request: zipUrl={}, overwrite={}", req.zipUrl, req.overwrite)
+
+        return client.post()
+            .uri("/feedback_url")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .bodyValue(req)
+            .exchangeToMono { resp ->
+                if (resp.statusCode().is2xxSuccessful) {
+                    resp.bodyToMono(FeedbackUrlResponse::class.java)
+                } else {
+                    resp.bodyToMono(String::class.java)
+                        .defaultIfEmpty("")
+                        .flatMap { body ->
+                            val msg = "FastAPI /feedback_url failed: status=${resp.statusCode().value()}, body=${body.take(500)}"
+                            Mono.error(IllegalStateException(msg))
+                        }
+                }
+            }
+            .timeout(Duration.ofMinutes(5))
+            .block() ?: throw IllegalStateException("FastAPI /feedback_url returned empty body")
+    }
+
+    override fun getFinetuneStatus(jobId: String): FinetuneStatusResponse {
+        log.info("FastAPI finetune status: jobId={}", jobId)
+
+        return client.get()
+            .uri("/finetune/{jobId}", jobId)
+            .accept(MediaType.APPLICATION_JSON)
+            .retrieve()
+            .bodyToMono(FinetuneStatusResponse::class.java)
+            .timeout(Duration.ofSeconds(30))
+            .block() ?: throw IllegalStateException("FastAPI /finetune/$jobId returned empty body")
+    }
 }
