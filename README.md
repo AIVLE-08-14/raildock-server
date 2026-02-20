@@ -15,11 +15,17 @@
 ## 주요 기능
 
 - 세션 기반 Authentication
+- AWS CloudFront, S3를 활용한 파일 업로드 및 관리
 - 철도 주행영상 업로드 후 결함 탐지 및 분석
 - 분석에 사용되는 규정 문서 CRUD
 - 규정 문서, 결함 정보들을 RAG로 활용한 지능형 챗봇
+- 탐지 모델 파인튜닝을 위한 엔지니어 피드백 처리 기능
 
-## 로컬 환경 및 실행방법
+## 배포 환경
+- AWS CodePipeline, CodeBuild, CodeDeploy를 활용한 CI/CD 구축
+- RCS를 활용한 이미지 빌드 및 EC2 배포 자동화
+
+## 로컬 환경설정 및 실행방법
 1. docker, java 21 설치
 2. application-dev.yml 파일 작성 (aws s3 시크릿키 발급받아서 사용)
 
@@ -36,5 +42,3 @@ integration:
 ```
 3. `docker compose up` - MySQL 실행
 4. `gradlew bootRun --args='--spring.profiles.active=dev'` - 서버 실행
-
-## 결과 및 성과
