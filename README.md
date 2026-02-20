@@ -46,9 +46,24 @@
 - 개발: Spring Boot, Kotlin, MySQL, SpringSecurity
 - 배포: Docker, AWS(S3, Pipeline, CodeBuild, CodeDeploy, EC2, RCS)
 
-### 전체 시스템 배포 환경 (원래는 이부분을 기능으로 뺄려고헀는데 그건좀 아닌것같음. 여기서 전체 아키텍쳐 배포 설명하는게 좋은듯 )
-- AWS CodePipeline, CodeBuild, CodeDeploy를 활용한 CI/CD 구축
-- RCS를 활용한 이미지 빌드 및 EC2 배포 자동화
+### 전체 시스템 배포 환경
+1. AWS CodePipeline으로 배포 플로우 자동화
+  - GitHub push를 트리거로 Pipeline 실행
+  - Source -> Build(CodeBuild) -> Deploy(CodeDeploy) 단계로 구성
+  - 배포 환경(EC2)을 단일 진입점으로 구성하고, 운영 반영 과정을 표준화
+2. CodeBuild로 Docker 이미지 빌드 및 아티팩트 생성
+   - 서버 배포는 환경 일관성을 위하여 Docker 기반으로 통일
+   - CodeBuild에서 다음 단계 수행
+     1. Gradle 빌드
+     2. Docker이미지 생성
+     3. 빌드된 이미지를 ECR에 Push
+     4. CodeDeploy가 사용할 배포 스크립트(Appspec + scripts) 아티팩트 생성
+3. CodeDeploy로 EC2 인스턴스에 배포
+   - EC2의 CodeDeploy Agent를 이용하여 배포를 자동 수행
+   - Deploy 단계에서 수행:
+     - 최신 이미지 Pull
+     - 기존 컨테이너 중지 및 최신버전 교체
+     - docker compose 기반으로 서비스 재기동
 
 ### 로컬 환경설정 및 실행방법
 1. docker, java 21 설치
