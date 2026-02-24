@@ -139,8 +139,8 @@ integration:
 
 ## 상세 기술구현
 해당 프로젝트를 진행하면서 기술적으로 중요하거나 어려웠던 부분을 아래와 같이 정리하였습니다.
-1. [S3 + CloudFront를 활용한 File 시스템 설계 및 구축](#file-system)
-2. [철도 주행 영상 기반 결함 분석 통합 파이프라인 설계 및 구축](#pipe-line)
+1. [철도 주행 영상 기반 결함 분석 통합 파이프라인 설계 및 구축](#pipe-line)
+2. [S3 + CloudFront를 활용한 File 시스템 설계 및 구축](#file-system)
 3. [Session 로그인 FrontEnd CI/CD 배포 환경](#session-ci/cd)
 
 ---
